@@ -2,20 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://yfatdep8g3ts"
-path="res://.godot/imported/ghost.png-68f588a75950ea0c097ddb2ad21cf8e5.ctex"
+uid="uid://dys020qy84052"
+path="res://.godot/imported/goblin.png-4efc9ab61e8832435e7f63c3fbd56761.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/player/ghost.png"
-dest_files=["res://.godot/imported/ghost.png-68f588a75950ea0c097ddb2ad21cf8e5.ctex"]
+source_file="res://sprites/player/goblin.png"
+dest_files=["res://.godot/imported/goblin.png-4efc9ab61e8832435e7f63c3fbd56761.ctex"]
 
 [params]
 
-compress/mode=3
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
@@ -23,7 +23,7 @@ compress/rdo_quality_loss=0.0
 compress/hdr_compression=1
 compress/normal_map=0
 compress/channel_pack=0
-mipmaps/generate=true
+mipmaps/generate=false
 mipmaps/limit=-1
 roughness/mode=0
 roughness/src_normal=""
