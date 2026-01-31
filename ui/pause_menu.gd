@@ -4,9 +4,20 @@ extends CanvasLayer
 signal resume_game
 signal quit_to_menu
 
+var game_theme: Theme
+
 func _ready() -> void:
+	_load_theme()
 	_setup_ui()
 	visible = false
+
+func _load_theme() -> void:
+	var font_path = "res://ui/font/Retro Gaming.ttf"
+	if ResourceLoader.exists(font_path):
+		var font = load(font_path)
+		game_theme = Theme.new()
+		game_theme.set_default_font(font)
+		game_theme.set_default_font_size(16)
 
 func _setup_ui() -> void:
 	var overlay = ColorRect.new()
@@ -16,6 +27,8 @@ func _setup_ui() -> void:
 	add_child(overlay)
 
 	var panel = PanelContainer.new()
+	if game_theme:
+		panel.theme = game_theme
 	panel.anchor_left = 0.5
 	panel.anchor_right = 0.5
 	panel.anchor_top = 0.5

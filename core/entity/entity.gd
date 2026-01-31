@@ -38,7 +38,10 @@ func take_damage(amount: int) -> int:
 func heal(amount: int) -> int:
 	var old_health = health
 	health = min(health + amount, max_health)
-	return health - old_health
+	var healed = health - old_health
+	if healed > 0:
+		EventBus.entity_healed.emit(self, healed)
+	return healed
 
 func die() -> void:
 	EventBus.entity_died.emit(self)

@@ -28,6 +28,8 @@ var current_terrain_wall: int = 1
 const FLOOR_TERRAIN_PER_LEVEL: Array[int] = [0, 2, 4, 6, 8]
 const WALL_TERRAIN_PER_LEVEL: Array[int] = [1, 3, 5, 7, 9]
 
+var damage_font: Font
+
 func _ready() -> void:
 	EventBus.entity_moved.connect(_on_entity_moved)
 	EventBus.entity_spawned.connect(_on_entity_spawned)
@@ -35,9 +37,17 @@ func _ready() -> void:
 	EventBus.mask_dropped.connect(_on_mask_dropped)
 	EventBus.mask_picked_up.connect(_on_mask_picked_up)
 	EventBus.mask_equipped.connect(_on_mask_equipped)
+	EventBus.entity_attacked.connect(_on_entity_attacked)
+	EventBus.entity_healed.connect(_on_entity_healed)
 
 	_preload_sprites()
 	_preload_player_sprites()
+	_load_damage_font()
+
+func _load_damage_font() -> void:
+	var font_path = "res://ui/font/Retro Gaming.ttf"
+	if ResourceLoader.exists(font_path):
+		damage_font = load(font_path)
 
 func _preload_sprites() -> void:
 	var paths = {
@@ -498,3 +508,35 @@ func _on_mask_picked_up(_mask: Mask, _entity: Entity) -> void:
 func _on_mask_equipped(mask: Mask, entity: Entity) -> void:
 	if entity is Player:
 		_update_player_sprite(entity as Player)
+
+func _on_entity_attacked(_attacker: Entity, target: Entity, damage: int) -> void:
+	if damage == 0:
+		spawn_floating_text(target.grid_position, "MISS", Color.GRAY)
+	else:
+		spawn_floating_text(target.grid_position, str(damage), Color.RED)
+
+func _on_entity_healed(entity: Entity, amount: int) -> void:
+	spawn_floating_text(entity.grid_position, "+" + str(amount), Color.LIME_GREEN)
+
+func spawn_floating_text(grid_pos: Vector2i, text: String, color: Color) -> void:
+	var label = Label.new()
+	label.text = text
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_font_size_override("font_size", 14)
+	if damage_font:
+		label.add_theme_font_override("font", damage_font)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.z_index = 100
+
+	var start_pos = Vector2(grid_pos.x * TILE_SIZE + TILE_SIZE / 2, grid_pos.y * TILE_SIZE)
+	label.position = start_pos - Vector2(label.size.x / 2, 0)
+	label.pivot_offset = label.size / 2
+
+	add_child(label)
+
+	var tween = create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(label, "position:y", start_pos.y - 30, 0.6).set_ease(Tween.EASE_OUT)
+	tween.tween_property(label, "modulate:a", 0.0, 0.6).set_ease(Tween.EASE_IN).set_delay(0.2)
+	tween.set_parallel(false)
+	tween.tween_callback(label.queue_free)

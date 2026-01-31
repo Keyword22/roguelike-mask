@@ -7,13 +7,27 @@ var message_log: MessageLog
 var floor_label: Label
 var stats_label: Label
 
+var game_font: Font
+var game_theme: Theme
+
 func _ready() -> void:
+	_load_font()
 	_setup_ui()
 	EventBus.floor_changed.connect(_on_floor_changed)
 	EventBus.ui_update_requested.connect(_update_stats)
 
+func _load_font() -> void:
+	var font_path = "res://ui/font/Retro Gaming.ttf"
+	if ResourceLoader.exists(font_path):
+		game_font = load(font_path)
+		game_theme = Theme.new()
+		game_theme.set_default_font(game_font)
+		game_theme.set_default_font_size(16)
+
 func _setup_ui() -> void:
 	var top_panel = PanelContainer.new()
+	if game_theme:
+		top_panel.theme = game_theme
 	top_panel.anchor_right = 1.0
 	top_panel.offset_bottom = 60
 	add_child(top_panel)
@@ -34,6 +48,8 @@ func _setup_ui() -> void:
 	top_hbox.add_child(floor_label)
 
 	var right_panel = PanelContainer.new()
+	if game_theme:
+		right_panel.theme = game_theme
 	right_panel.anchor_left = 1.0
 	right_panel.anchor_right = 1.0
 	right_panel.anchor_bottom = 1.0
@@ -46,6 +62,8 @@ func _setup_ui() -> void:
 	right_panel.add_child(mask_display)
 
 	var bottom_panel = PanelContainer.new()
+	if game_theme:
+		bottom_panel.theme = game_theme
 	bottom_panel.anchor_top = 1.0
 	bottom_panel.anchor_right = 1.0
 	bottom_panel.anchor_bottom = 1.0
