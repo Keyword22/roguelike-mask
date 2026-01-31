@@ -32,6 +32,10 @@ window/size/mode=3
 
 project/assembly_name="roguelike-mask"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/tile_bit_tools/plugin.cfg")
+
 [input]
 
 move_up={

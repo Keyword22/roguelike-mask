@@ -21,8 +21,12 @@ const COLOR_EXPLORED = Color(0.1, 0.08, 0.05, 0.7)
 const FOV_RADIUS = 8
 
 const TERRAIN_SET_ID: int = 0
-const TERRAIN_FLOOR: int = 0
-const TERRAIN_WALL: int = 1
+
+var current_terrain_floor: int = 0
+var current_terrain_wall: int = 1
+
+const FLOOR_TERRAIN_PER_LEVEL: Array[int] = [0, 2, 4, 6, 8]
+const WALL_TERRAIN_PER_LEVEL: Array[int] = [1, 3, 5, 7, 9]
 
 func _ready() -> void:
 	EventBus.entity_moved.connect(_on_entity_moved)
@@ -105,6 +109,7 @@ func _create_player_sprite_frames(texture: Texture2D) -> SpriteFrames:
 func render_level(lvl: Level) -> void:
 	level = lvl
 	_clear_all()
+	_setup_terrains_for_floor(GameState.current_floor)
 
 	if tileset_resource:
 		_render_level_with_terrains()
@@ -113,6 +118,26 @@ func render_level(lvl: Level) -> void:
 
 	_create_fog_overlay()
 	_update_fov()
+
+func _setup_terrains_for_floor(floor_num: int) -> void:
+	var floor_index = clampi(floor_num - 1, 0, FLOOR_TERRAIN_PER_LEVEL.size() - 1)
+
+	var desired_floor_terrain = FLOOR_TERRAIN_PER_LEVEL[floor_index]
+	var desired_wall_terrain = WALL_TERRAIN_PER_LEVEL[floor_index]
+
+	if tileset_resource and _terrain_exists(desired_floor_terrain) and _terrain_exists(desired_wall_terrain):
+		current_terrain_floor = desired_floor_terrain
+		current_terrain_wall = desired_wall_terrain
+	else:
+		current_terrain_floor = FLOOR_TERRAIN_PER_LEVEL[0]
+		current_terrain_wall = WALL_TERRAIN_PER_LEVEL[0]
+
+func _terrain_exists(terrain_index: int) -> bool:
+	if not tileset_resource:
+		return false
+	if tileset_resource.get_terrain_sets_count() == 0:
+		return false
+	return terrain_index < tileset_resource.get_terrains_count(TERRAIN_SET_ID)
 
 func _clear_all() -> void:
 	for child in get_children():
@@ -141,8 +166,8 @@ func _render_level_with_terrains() -> void:
 			else:
 				floor_cells.append(pos)
 
-	tile_map.set_cells_terrain_connect(floor_cells, TERRAIN_SET_ID, TERRAIN_FLOOR)
-	tile_map.set_cells_terrain_connect(wall_cells, TERRAIN_SET_ID, TERRAIN_WALL)
+	tile_map.set_cells_terrain_connect(floor_cells, TERRAIN_SET_ID, current_terrain_floor)
+	tile_map.set_cells_terrain_connect(wall_cells, TERRAIN_SET_ID, current_terrain_wall)
 
 	_place_stairs()
 

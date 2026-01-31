@@ -10,6 +10,11 @@ var camera: Camera2D
 var player: Player
 var current_level: Level
 
+var move_repeat_timer: float = 0.0
+const MOVE_REPEAT_DELAY: float = 0.15
+const MOVE_INITIAL_DELAY: float = 0.25
+var move_held_time: float = 0.0
+
 const ENEMY_TYPES = [
 	preload("res://enemies/goblin.gd"),
 	preload("res://enemies/slime.gd"),
@@ -186,6 +191,39 @@ func _update_camera() -> void:
 			player.grid_position.y * AsciiRenderer.TILE_SIZE
 		)
 
+func _process(delta: float) -> void:
+	if GameState.current_state != GameState.State.PLAYING:
+		return
+	if pause_menu.visible:
+		return
+	if not TurnManager.is_player_turn():
+		return
+
+	var direction = _get_held_move_direction()
+	if direction != Vector2i.ZERO:
+		move_held_time += delta
+		move_repeat_timer -= delta
+
+		if move_repeat_timer <= 0:
+			var delay = MOVE_INITIAL_DELAY if move_held_time < MOVE_INITIAL_DELAY else MOVE_REPEAT_DELAY
+			move_repeat_timer = delay
+			var action = MoveAction.new(player, direction)
+			TurnManager.execute_player_action(action)
+	else:
+		move_held_time = 0.0
+		move_repeat_timer = 0.0
+
+func _get_held_move_direction() -> Vector2i:
+	if Input.is_action_pressed("move_up") or Input.is_action_pressed("ui_up"):
+		return Vector2i(0, -1)
+	if Input.is_action_pressed("move_down") or Input.is_action_pressed("ui_down"):
+		return Vector2i(0, 1)
+	if Input.is_action_pressed("move_left") or Input.is_action_pressed("ui_left"):
+		return Vector2i(-1, 0)
+	if Input.is_action_pressed("move_right") or Input.is_action_pressed("ui_right"):
+		return Vector2i(1, 0)
+	return Vector2i.ZERO
+
 func _unhandled_input(event: InputEvent) -> void:
 	if GameState.current_state != GameState.State.PLAYING:
 		return
@@ -204,28 +242,14 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not TurnManager.is_player_turn():
 		return
 
-	var action = null
-
-	if event.is_action_pressed("move_up") or event.is_action_pressed("ui_up"):
-		action = MoveAction.new(player, Vector2i(0, -1))
-	elif event.is_action_pressed("move_down") or event.is_action_pressed("ui_down"):
-		action = MoveAction.new(player, Vector2i(0, 1))
-	elif event.is_action_pressed("move_left") or event.is_action_pressed("ui_left"):
-		action = MoveAction.new(player, Vector2i(-1, 0))
-	elif event.is_action_pressed("move_right") or event.is_action_pressed("ui_right"):
-		action = MoveAction.new(player, Vector2i(1, 0))
-	elif event.is_action_pressed("wait"):
-		action = WaitAction.new(player)
+	if event.is_action_pressed("wait"):
+		var action = WaitAction.new(player)
+		TurnManager.execute_player_action(action)
 	elif event.is_action_pressed("cycle_mask"):
 		player.mask_inventory.cycle_mask()
 		EventBus.ui_update_requested.emit()
-		return
 	elif event.is_action_pressed("use_ability"):
 		_use_mask_ability()
-		return
-
-	if action:
-		TurnManager.execute_player_action(action)
 
 func _use_mask_ability() -> void:
 	if not player.mask_inventory.equipped_mask:
