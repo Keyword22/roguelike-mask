@@ -31,6 +31,8 @@ const WALL_TERRAIN_PER_LEVEL: Array[int] = [1, 3, 5, 7, 9]
 var damage_font: Font
 
 func _ready() -> void:
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
 	EventBus.entity_moved.connect(_on_entity_moved)
 	EventBus.entity_spawned.connect(_on_entity_spawned)
 	EventBus.entity_died.connect(_on_entity_died)
@@ -278,6 +280,9 @@ func _update_fov() -> void:
 	_update_entity_visibility()
 	if fog_overlay:
 		fog_overlay.queue_redraw()
+
+func refresh_fov() -> void:
+	_update_fov()
 
 func _update_entity_visibility() -> void:
 	for entity in entity_nodes:

@@ -33,7 +33,7 @@ func _ready() -> void:
 
 func _setup_camera() -> void:
 	camera = Camera2D.new()
-	camera.zoom = Vector2(2, 2)
+	camera.zoom = Vector2(3, 3)
 	camera.position_smoothing_enabled = true
 	camera.position_smoothing_speed = 8.0
 	add_child(camera)
@@ -149,6 +149,7 @@ func _generate_new_floor() -> void:
 	_spawn_player(generator.get_player_spawn_position())
 	_spawn_enemies()
 	_update_camera()
+	renderer.refresh_fov()
 
 	EventBus.level_generated.emit(current_level)
 

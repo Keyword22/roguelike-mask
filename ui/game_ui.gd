@@ -19,7 +19,11 @@ func _ready() -> void:
 func _load_font() -> void:
 	var font_path = "res://ui/font/Retro Gaming.ttf"
 	if ResourceLoader.exists(font_path):
-		game_font = load(font_path)
+		var font_file = load(font_path) as FontFile
+		if font_file:
+			font_file.antialiasing = TextServer.FONT_ANTIALIASING_NONE
+			font_file.hinting = TextServer.HINTING_NONE
+		game_font = font_file
 		game_theme = Theme.new()
 		game_theme.set_default_font(game_font)
 		game_theme.set_default_font_size(16)

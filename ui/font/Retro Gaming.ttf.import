@@ -13,7 +13,7 @@ dest_files=["res://.godot/imported/Retro Gaming.ttf-0f00bcbf5f16971965ca1c4bd2c3
 [params]
 
 Rendering=null
-antialiasing=1
+antialiasing=0
 generate_mipmaps=false
 disable_embedded_bitmaps=true
 multichannel_signed_distance_field=false
