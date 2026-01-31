@@ -80,6 +80,10 @@ func has_mask_at(pos: Vector2i) -> bool:
 	var key = str(pos.x) + "," + str(pos.y)
 	return dropped_masks.has(key)
 
+func get_mask_at(pos: Vector2i) -> Mask:
+	var key = str(pos.x) + "," + str(pos.y)
+	return dropped_masks.get(key, null)
+
 func pickup_mask_at(pos: Vector2i) -> Mask:
 	var key = str(pos.x) + "," + str(pos.y)
 	if dropped_masks.has(key):

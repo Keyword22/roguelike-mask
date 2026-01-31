@@ -46,8 +46,15 @@ func _check_mask_pickup(pos: Vector2i) -> void:
 	if entity is Player:
 		var level = GameState.current_level
 		if level and level.has_mask_at(pos):
-			var mask = level.pickup_mask_at(pos)
+			var mask = level.get_mask_at(pos)
 			if mask:
-				entity.mask_inventory.add_mask(mask)
-				EventBus.mask_picked_up.emit(mask, entity)
-				EventBus.message_logged.emit("¡Recogiste la máscara de " + mask.mask_name + "!", Color.GREEN)
+				if entity.mask_inventory.has_mask_of_type(mask.mask_name):
+					EventBus.message_logged.emit("Ya tienes la máscara de " + mask.mask_name + ".", Color.GRAY)
+					return
+				if entity.mask_inventory.get_mask_count() >= MaskInventory.MAX_MASKS:
+					EventBus.message_logged.emit("¡Inventario lleno! Máximo " + str(MaskInventory.MAX_MASKS) + " máscaras.", Color.GRAY)
+					return
+				var picked_mask = level.pickup_mask_at(pos)
+				if picked_mask and entity.mask_inventory.add_mask(picked_mask):
+					EventBus.mask_picked_up.emit(picked_mask, entity)
+					EventBus.message_logged.emit("¡Recogiste la máscara de " + picked_mask.mask_name + "!", Color.GREEN)

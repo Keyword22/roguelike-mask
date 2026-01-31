@@ -45,4 +45,10 @@ func _process_enemy_turn() -> void:
 
 func _process_world_update() -> void:
 	current_phase = Phase.WORLD_UPDATE
+	_tick_mask_cooldowns()
 	EventBus.ui_update_requested.emit()
+
+func _tick_mask_cooldowns() -> void:
+	var player = GameState.player
+	if player and player.mask_inventory:
+		player.mask_inventory.tick_all_cooldowns()
