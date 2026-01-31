@@ -19,6 +19,7 @@ func _ready() -> void:
 	skeleton_mask.defense_bonus = 1
 	skeleton_mask.ability_name = "Lanzar Hueso"
 	skeleton_mask.ability_cooldown = 3
+	skeleton_mask.sprite_id = "skeleton"
 	mask_drop = skeleton_mask
 
 	super._ready()

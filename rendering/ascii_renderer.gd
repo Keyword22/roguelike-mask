@@ -1,7 +1,7 @@
 class_name AsciiRenderer
 extends Node2D
 
-const TILE_SIZE: int = 16
+const TILE_SIZE: int = 32
 const FONT_SIZE: int = 16
 
 var level: Level
@@ -25,18 +25,14 @@ func render_level(lvl: Level) -> void:
 	_create_tile_labels()
 
 func _clear_tiles() -> void:
-	for label in tile_labels:
-		if is_instance_valid(label):
-			label.queue_free()
+	for child in get_children():
+		child.queue_free()
 	tile_labels.clear()
-	for key in mask_labels:
-		if is_instance_valid(mask_labels[key]):
-			mask_labels[key].queue_free()
 	mask_labels.clear()
-	for entity in entity_labels:
-		if is_instance_valid(entity_labels[entity]):
-			entity_labels[entity].queue_free()
 	entity_labels.clear()
+
+func _clear_all() -> void:
+	_clear_tiles()
 
 func _create_tile_labels() -> void:
 	for y in level.height:

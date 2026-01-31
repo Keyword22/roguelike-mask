@@ -13,6 +13,7 @@ extends Resource
 @export var can_phase: bool = false
 @export var ability_name: String = ""
 @export var ability_cooldown: int = 0
+@export var sprite_id: String = ""
 
 var current_cooldown: int = 0
 
@@ -44,4 +45,5 @@ func duplicate_mask() -> Mask:
 	new_mask.can_phase = can_phase
 	new_mask.ability_name = ability_name
 	new_mask.ability_cooldown = ability_cooldown
+	new_mask.sprite_id = sprite_id
 	return new_mask

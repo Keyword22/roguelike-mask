@@ -18,6 +18,7 @@ func _ready() -> void:
 	goblin_mask.attack_bonus = 2
 	goblin_mask.ability_name = "Embestida"
 	goblin_mask.ability_cooldown = 5
+	goblin_mask.sprite_id = "goblin"
 	mask_drop = goblin_mask
 
 	super._ready()

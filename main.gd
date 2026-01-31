@@ -1,6 +1,6 @@
 extends Node2D
 
-var renderer: AsciiRenderer
+var renderer: TilemapRenderer
 var game_ui: GameUI
 var main_menu: MainMenu
 var pause_menu: PauseMenu
@@ -27,10 +27,13 @@ func _ready() -> void:
 func _setup_camera() -> void:
 	camera = Camera2D.new()
 	camera.zoom = Vector2(2, 2)
+	camera.position_smoothing_enabled = true
+	camera.position_smoothing_speed = 8.0
 	add_child(camera)
 
 func _setup_renderer() -> void:
-	renderer = AsciiRenderer.new()
+	renderer = TilemapRenderer.new()
+	#renderer.tileset_resource = load("res://tilesets/dungeon.tres")
 	add_child(renderer)
 
 func _setup_ui() -> void:
@@ -108,16 +111,21 @@ func _cleanup_game() -> void:
 	if current_level:
 		current_level.queue_free()
 		current_level = null
+		GameState.current_level = null
 
 	for entity in GameState.entities.duplicate():
 		if is_instance_valid(entity):
 			entity.queue_free()
 
+	player = null
+	renderer._clear_all()
 	GameState.reset()
 
 func _generate_new_floor() -> void:
 	if current_level:
 		current_level.queue_free()
+		current_level = null
+		GameState.current_level = null
 
 	for entity in GameState.entities.duplicate():
 		if is_instance_valid(entity) and entity != player:

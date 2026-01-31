@@ -19,6 +19,7 @@ func _ready() -> void:
 	ghost_mask.can_phase = true
 	ghost_mask.ability_name = "Fase"
 	ghost_mask.ability_cooldown = 0
+	ghost_mask.sprite_id = "ghost"
 	mask_drop = ghost_mask
 
 	super._ready()

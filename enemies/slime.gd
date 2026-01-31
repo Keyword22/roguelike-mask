@@ -18,6 +18,7 @@ func _ready() -> void:
 	slime_mask.health_bonus = 5
 	slime_mask.ability_name = "División"
 	slime_mask.ability_cooldown = 8
+	slime_mask.sprite_id = "slime"
 	mask_drop = slime_mask
 
 	super._ready()

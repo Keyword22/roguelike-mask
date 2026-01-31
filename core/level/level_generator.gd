@@ -52,37 +52,69 @@ func _carve_room(room: Rect2i) -> void:
 			level.set_tile(Vector2i(x, y), Level.TileType.FLOOR)
 
 func _connect_rooms() -> void:
+	if level.rooms.size() < 2:
+		return
+
+	var connected: Array[int] = [0]
+	var unconnected: Array[int] = []
 	for i in range(1, level.rooms.size()):
-		var room_a = level.rooms[i - 1]
-		var room_b = level.rooms[i]
+		unconnected.append(i)
 
-		var center_a = Vector2i(
-			room_a.position.x + room_a.size.x / 2,
-			room_a.position.y + room_a.size.y / 2
-		)
-		var center_b = Vector2i(
-			room_b.position.x + room_b.size.x / 2,
-			room_b.position.y + room_b.size.y / 2
-		)
+	while unconnected.size() > 0:
+		var best_from: int = -1
+		var best_to: int = -1
+		var best_dist: float = INF
 
-		if randi() % 2 == 0:
-			_carve_horizontal_tunnel(center_a.x, center_b.x, center_a.y)
-			_carve_vertical_tunnel(center_a.y, center_b.y, center_b.x)
-		else:
-			_carve_vertical_tunnel(center_a.y, center_b.y, center_a.x)
-			_carve_horizontal_tunnel(center_a.x, center_b.x, center_b.y)
+		for c_idx in connected:
+			for u_idx in unconnected:
+				var dist = _room_distance(level.rooms[c_idx], level.rooms[u_idx])
+				if dist < best_dist:
+					best_dist = dist
+					best_from = c_idx
+					best_to = u_idx
+
+		if best_to != -1:
+			_connect_two_rooms(level.rooms[best_from], level.rooms[best_to])
+			connected.append(best_to)
+			unconnected.erase(best_to)
+
+func _room_distance(room_a: Rect2i, room_b: Rect2i) -> float:
+	var center_a = Vector2(room_a.position.x + room_a.size.x / 2.0, room_a.position.y + room_a.size.y / 2.0)
+	var center_b = Vector2(room_b.position.x + room_b.size.x / 2.0, room_b.position.y + room_b.size.y / 2.0)
+	return center_a.distance_to(center_b)
+
+func _connect_two_rooms(room_a: Rect2i, room_b: Rect2i) -> void:
+	var center_a = Vector2i(room_a.position.x + room_a.size.x / 2, room_a.position.y + room_a.size.y / 2)
+	var center_b = Vector2i(room_b.position.x + room_b.size.x / 2, room_b.position.y + room_b.size.y / 2)
+
+	if randi() % 2 == 0:
+		_carve_horizontal_tunnel(center_a.x, center_b.x, center_a.y)
+		_carve_vertical_tunnel(center_a.y, center_b.y, center_b.x)
+	else:
+		_carve_vertical_tunnel(center_a.y, center_b.y, center_a.x)
+		_carve_horizontal_tunnel(center_a.x, center_b.x, center_b.y)
+
+var corridor_width: int = 3
 
 func _carve_horizontal_tunnel(x1: int, x2: int, y: int) -> void:
 	var start_x = min(x1, x2)
 	var end_x = max(x1, x2)
+	var half_width = corridor_width / 2
 	for x in range(start_x, end_x + 1):
-		level.set_tile(Vector2i(x, y), Level.TileType.FLOOR)
+		for dy in range(-half_width, half_width + 1):
+			var pos = Vector2i(x, y + dy)
+			if level.is_in_bounds(pos):
+				level.set_tile(pos, Level.TileType.FLOOR)
 
 func _carve_vertical_tunnel(y1: int, y2: int, x: int) -> void:
 	var start_y = min(y1, y2)
 	var end_y = max(y1, y2)
+	var half_width = corridor_width / 2
 	for y in range(start_y, end_y + 1):
-		level.set_tile(Vector2i(x, y), Level.TileType.FLOOR)
+		for dx in range(-half_width, half_width + 1):
+			var pos = Vector2i(x + dx, y)
+			if level.is_in_bounds(pos):
+				level.set_tile(pos, Level.TileType.FLOOR)
 
 func _place_stairs() -> void:
 	if level.rooms.size() < 2:
