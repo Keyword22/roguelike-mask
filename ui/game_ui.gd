@@ -53,12 +53,14 @@ func _setup_ui() -> void:
 	right_panel.anchor_left = 1.0
 	right_panel.anchor_right = 1.0
 	right_panel.anchor_bottom = 1.0
-	right_panel.offset_left = -200
+	right_panel.offset_left = -220
 	right_panel.offset_top = 70
 	right_panel.offset_bottom = -150
+	right_panel.clip_contents = true
 	add_child(right_panel)
 
 	mask_display = MaskDisplay.new()
+	mask_display.custom_minimum_size = Vector2(200, 0)
 	right_panel.add_child(mask_display)
 
 	var bottom_panel = PanelContainer.new()

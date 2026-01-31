@@ -276,8 +276,8 @@ func _use_mask_ability() -> void:
 			EventBus.message_logged.emit("¡Fase es pasiva - atraviesa muros!", Color.CYAN)
 			return
 
-	mask.use_ability()
 	EventBus.mask_ability_used.emit(mask, player)
+	_break_equipped_mask()
 	TurnManager.execute_player_action(WaitAction.new(player))
 
 func _ability_rush() -> void:
@@ -332,7 +332,16 @@ func _ability_bone_throw() -> void:
 
 	if hit_enemy:
 		var damage = player.get_total_attack()
-		hit_enemy.take_damage(damage)
-		EventBus.message_logged.emit("¡Lanzar hueso golpea a " + hit_enemy.entity_name + " por " + str(damage) + "!", Color.WHITE)
+		var actual_damage = hit_enemy.take_damage(damage)
+		EventBus.entity_attacked.emit(player, hit_enemy, actual_damage)
+		EventBus.message_logged.emit("¡Lanzar hueso golpea a " + hit_enemy.entity_name + " por " + str(actual_damage) + "!", Color.WHITE)
 	else:
+		renderer.spawn_floating_text(player.grid_position, "MISS", Color.GRAY)
+		AudioManager.play_sfx_by_name("miss")
 		EventBus.message_logged.emit("¡Lanzar hueso falla!", Color.GRAY)
+
+func _break_equipped_mask() -> void:
+	var mask_name = player.mask_inventory.equipped_mask.mask_name
+	player.mask_inventory.remove_mask(player.mask_inventory.equipped_index)
+	EventBus.message_logged.emit("¡La máscara de " + mask_name + " se rompe!", Color.ORANGE)
+	EventBus.ui_update_requested.emit()

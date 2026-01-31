@@ -15,6 +15,7 @@ func _ready() -> void:
 func _setup_ui() -> void:
 	mask_label = Label.new()
 	mask_label.text = "Mask: None"
+	mask_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	add_child(mask_label)
 
 	stats_label = Label.new()
@@ -23,6 +24,7 @@ func _setup_ui() -> void:
 
 	ability_label = Label.new()
 	ability_label.text = ""
+	ability_label.autowrap_mode = TextServer.AUTOWRAP_WORD
 	add_child(ability_label)
 
 	cooldown_label = Label.new()
@@ -37,7 +39,10 @@ func _update() -> void:
 	var inv = player.mask_inventory
 	if inv.equipped_mask:
 		var mask = inv.equipped_mask
-		mask_label.text = "Máscara: " + mask.mask_name + " (" + str(inv.equipped_index + 1) + "/" + str(inv.get_mask_count()) + ")"
+		var count_text = ""
+		if inv.get_mask_count() > 1:
+			count_text = " [E]"
+		mask_label.text = mask.mask_name + " (" + str(inv.equipped_index + 1) + "/" + str(inv.get_mask_count()) + ")" + count_text
 
 		var stats = []
 		if mask.attack_bonus != 0:
@@ -51,16 +56,13 @@ func _update() -> void:
 		stats_label.text = " ".join(stats)
 
 		if mask.has_ability():
-			ability_label.text = "Habilidad: " + mask.ability_name + " [Q]"
-			if mask.current_cooldown > 0:
-				cooldown_label.text = "Enfriamiento: " + str(mask.current_cooldown)
-			else:
-				cooldown_label.text = "¡Listo!"
+			ability_label.text = "[Q] " + mask.ability_name
+			cooldown_label.text = "(¡Se rompe!)"
 		else:
 			ability_label.text = ""
 			cooldown_label.text = ""
 	else:
-		mask_label.text = "Máscara: Ninguna (obtén de enemigos)"
+		mask_label.text = "Máscara: Ninguna"
 		stats_label.text = ""
 		ability_label.text = ""
 		cooldown_label.text = ""
