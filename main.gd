@@ -101,8 +101,8 @@ func _on_entity_moved(entity, _from, _to) -> void:
 func _start_new_game() -> void:
 	GameState.start_game()
 	_generate_new_floor()
-	EventBus.message_logged.emit("Welcome to the dungeon! Find the stairs (>) to descend.", Color.CYAN)
-	EventBus.message_logged.emit("Defeat enemies to collect their masks!", Color.CYAN)
+	EventBus.message_logged.emit("¡Bienvenido a la mazmorra! Encuentra las escaleras (>) para descender.", Color.CYAN)
+	EventBus.message_logged.emit("¡Derrota enemigos para obtener sus máscaras!", Color.CYAN)
 
 func _cleanup_game() -> void:
 	if current_level:
@@ -221,27 +221,27 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _use_mask_ability() -> void:
 	if not player.mask_inventory.equipped_mask:
-		EventBus.message_logged.emit("No mask equipped!", Color.GRAY)
+		EventBus.message_logged.emit("¡No tienes máscara equipada!", Color.GRAY)
 		return
 
 	var mask = player.mask_inventory.equipped_mask
 	if not mask.has_ability():
-		EventBus.message_logged.emit("This mask has no active ability.", Color.GRAY)
+		EventBus.message_logged.emit("Esta máscara no tiene habilidad activa.", Color.GRAY)
 		return
 
 	if not mask.can_use_ability():
-		EventBus.message_logged.emit("Ability on cooldown: " + str(mask.current_cooldown) + " turns.", Color.GRAY)
+		EventBus.message_logged.emit("Habilidad en enfriamiento: " + str(mask.current_cooldown) + " turnos.", Color.GRAY)
 		return
 
 	match mask.ability_name:
-		"Rush":
+		"Embestida":
 			_ability_rush()
-		"Split":
+		"División":
 			_ability_split()
-		"Bone Throw":
+		"Lanzar Hueso":
 			_ability_bone_throw()
-		"Phase":
-			EventBus.message_logged.emit("Phase is passive - walk through walls!", Color.CYAN)
+		"Fase":
+			EventBus.message_logged.emit("¡Fase es pasiva - atraviesa muros!", Color.CYAN)
 			return
 
 	mask.use_ability()
@@ -274,13 +274,13 @@ func _ability_rush() -> void:
 			else:
 				break
 
-		EventBus.message_logged.emit("Rush toward " + closest_enemy.entity_name + "!", Color.GREEN)
+		EventBus.message_logged.emit("¡Embestida hacia " + closest_enemy.entity_name + "!", Color.GREEN)
 	else:
-		EventBus.message_logged.emit("No nearby enemy to rush!", Color.GRAY)
+		EventBus.message_logged.emit("¡No hay enemigo cercano para embestir!", Color.GRAY)
 
 func _ability_split() -> void:
 	var heal_amount = player.heal(player.max_health / 4)
-	EventBus.message_logged.emit("Slime regeneration heals " + str(heal_amount) + " HP!", Color.LIME_GREEN)
+	EventBus.message_logged.emit("¡Regeneración de limo cura " + str(heal_amount) + " VDA!", Color.LIME_GREEN)
 
 func _ability_bone_throw() -> void:
 	var directions = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
@@ -301,6 +301,6 @@ func _ability_bone_throw() -> void:
 	if hit_enemy:
 		var damage = player.get_total_attack()
 		hit_enemy.take_damage(damage)
-		EventBus.message_logged.emit("Bone throw hits " + hit_enemy.entity_name + " for " + str(damage) + "!", Color.WHITE)
+		EventBus.message_logged.emit("¡Lanzar hueso golpea a " + hit_enemy.entity_name + " por " + str(damage) + "!", Color.WHITE)
 	else:
-		EventBus.message_logged.emit("Bone throw misses!", Color.GRAY)
+		EventBus.message_logged.emit("¡Lanzar hueso falla!", Color.GRAY)

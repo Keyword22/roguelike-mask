@@ -32,18 +32,18 @@ func _setup_ui() -> void:
 	panel.add_child(vbox)
 
 	var title = Label.new()
-	title.text = "PAUSED"
+	title.text = "PAUSA"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 24)
 	vbox.add_child(title)
 
 	var resume_btn = Button.new()
-	resume_btn.text = "Resume"
+	resume_btn.text = "Continuar"
 	resume_btn.pressed.connect(_on_resume)
 	vbox.add_child(resume_btn)
 
 	var quit_btn = Button.new()
-	quit_btn.text = "Quit to Menu"
+	quit_btn.text = "Volver al Menú"
 	quit_btn.pressed.connect(_on_quit)
 	vbox.add_child(quit_btn)
 

@@ -3,7 +3,7 @@ extends Node2D
 
 @export var display_char: String = "?"
 @export var display_color: Color = Color.WHITE
-@export var entity_name: String = "Entity"
+@export var entity_name: String = "Entidad"
 
 @export var max_health: int = 10
 @export var health: int = 10

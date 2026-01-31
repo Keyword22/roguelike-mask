@@ -35,7 +35,7 @@ func _setup_ui() -> void:
 	panel.add_child(vbox)
 
 	title_label = Label.new()
-	title_label.text = "GAME OVER"
+	title_label.text = "FIN DEL JUEGO"
 	title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title_label.add_theme_font_size_override("font_size", 28)
 	vbox.add_child(title_label)
@@ -46,25 +46,25 @@ func _setup_ui() -> void:
 	vbox.add_child(message_label)
 
 	var restart_btn = Button.new()
-	restart_btn.text = "Play Again"
+	restart_btn.text = "Jugar de Nuevo"
 	restart_btn.pressed.connect(_on_restart)
 	vbox.add_child(restart_btn)
 
 	var quit_btn = Button.new()
-	quit_btn.text = "Main Menu"
+	quit_btn.text = "Menú Principal"
 	quit_btn.pressed.connect(_on_quit)
 	vbox.add_child(quit_btn)
 
 func show_game_over(victory: bool) -> void:
 	visible = true
 	if victory:
-		title_label.text = "VICTORY!"
+		title_label.text = "¡VICTORIA!"
 		title_label.add_theme_color_override("font_color", Color.GOLD)
-		message_label.text = "You conquered all 5 floors!\nThe masks are yours."
+		message_label.text = "¡Conquistaste los 5 pisos!\nLas máscaras son tuyas."
 	else:
-		title_label.text = "GAME OVER"
+		title_label.text = "FIN DEL JUEGO"
 		title_label.add_theme_color_override("font_color", Color.RED)
-		message_label.text = "You were defeated on floor " + str(GameState.current_floor) + "."
+		message_label.text = "Fuiste derrotado en el piso " + str(GameState.current_floor) + "."
 
 func _on_restart() -> void:
 	visible = false

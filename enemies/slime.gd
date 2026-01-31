@@ -16,7 +16,7 @@ func _ready() -> void:
 	slime_mask.display_char = "s"
 	slime_mask.color = Color.LIME_GREEN
 	slime_mask.health_bonus = 5
-	slime_mask.ability_name = "Split"
+	slime_mask.ability_name = "División"
 	slime_mask.ability_cooldown = 8
 	mask_drop = slime_mask
 

@@ -16,11 +16,11 @@ func execute() -> bool:
 
 	EventBus.entity_attacked.emit(entity, target, actual_damage)
 
-	var msg = entity.entity_name + " attacks " + target.entity_name + " for " + str(actual_damage) + " damage!"
+	var msg = entity.entity_name + " ataca a " + target.entity_name + " por " + str(actual_damage) + " de daño!"
 	EventBus.message_logged.emit(msg, Color.RED)
 
 	if not target.is_alive():
-		var death_msg = target.entity_name + " is defeated!"
+		var death_msg = "¡" + target.entity_name + " ha sido derrotado!"
 		EventBus.message_logged.emit(death_msg, Color.ORANGE)
 
 	return true

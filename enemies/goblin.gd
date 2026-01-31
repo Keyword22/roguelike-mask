@@ -16,7 +16,7 @@ func _ready() -> void:
 	goblin_mask.display_char = "g"
 	goblin_mask.color = Color.GREEN
 	goblin_mask.attack_bonus = 2
-	goblin_mask.ability_name = "Rush"
+	goblin_mask.ability_name = "Embestida"
 	goblin_mask.ability_cooldown = 5
 	mask_drop = goblin_mask
 

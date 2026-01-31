@@ -10,7 +10,7 @@ var base_defense: int = 1
 func _ready() -> void:
 	display_char = "@"
 	display_color = Color.YELLOW
-	entity_name = "Player"
+	entity_name = "Jugador"
 
 	max_health = base_max_health
 	health = max_health

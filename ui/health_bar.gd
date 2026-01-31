@@ -11,7 +11,7 @@ func _ready() -> void:
 
 func _setup_ui() -> void:
 	var title = Label.new()
-	title.text = "HP: "
+	title.text = "VDA: "
 	add_child(title)
 
 	bar = ProgressBar.new()

@@ -26,11 +26,11 @@ func _setup_ui() -> void:
 	top_hbox.add_child(health_bar)
 
 	stats_label = Label.new()
-	stats_label.text = "ATK: 0 DEF: 0"
+	stats_label.text = "ATQ: 0 DEF: 0"
 	top_hbox.add_child(stats_label)
 
 	floor_label = Label.new()
-	floor_label.text = "Floor: 1/5"
+	floor_label.text = "Piso: 1/5"
 	top_hbox.add_child(floor_label)
 
 	var right_panel = PanelContainer.new()
@@ -57,9 +57,9 @@ func _setup_ui() -> void:
 	bottom_panel.add_child(message_log)
 
 func _on_floor_changed(floor_num: int) -> void:
-	floor_label.text = "Floor: " + str(floor_num) + "/" + str(GameState.max_floors)
+	floor_label.text = "Piso: " + str(floor_num) + "/" + str(GameState.max_floors)
 
 func _update_stats() -> void:
 	var player = GameState.player
 	if player:
-		stats_label.text = "ATK: " + str(player.get_total_attack()) + " DEF: " + str(player.get_total_defense())
+		stats_label.text = "ATQ: " + str(player.get_total_attack()) + " DEF: " + str(player.get_total_defense())

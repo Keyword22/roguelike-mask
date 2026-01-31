@@ -37,30 +37,30 @@ func _update() -> void:
 	var inv = player.mask_inventory
 	if inv.equipped_mask:
 		var mask = inv.equipped_mask
-		mask_label.text = "Mask: " + mask.mask_name + " (" + str(inv.equipped_index + 1) + "/" + str(inv.get_mask_count()) + ")"
+		mask_label.text = "Máscara: " + mask.mask_name + " (" + str(inv.equipped_index + 1) + "/" + str(inv.get_mask_count()) + ")"
 
 		var stats = []
 		if mask.attack_bonus != 0:
-			stats.append("ATK+" + str(mask.attack_bonus))
+			stats.append("ATQ+" + str(mask.attack_bonus))
 		if mask.defense_bonus != 0:
 			stats.append("DEF+" + str(mask.defense_bonus))
 		if mask.health_bonus != 0:
-			stats.append("HP+" + str(mask.health_bonus))
+			stats.append("VDA+" + str(mask.health_bonus))
 		if mask.can_phase:
-			stats.append("Phase")
+			stats.append("Fase")
 		stats_label.text = " ".join(stats)
 
 		if mask.has_ability():
-			ability_label.text = "Ability: " + mask.ability_name + " [Q]"
+			ability_label.text = "Habilidad: " + mask.ability_name + " [Q]"
 			if mask.current_cooldown > 0:
-				cooldown_label.text = "Cooldown: " + str(mask.current_cooldown)
+				cooldown_label.text = "Enfriamiento: " + str(mask.current_cooldown)
 			else:
-				cooldown_label.text = "Ready!"
+				cooldown_label.text = "¡Listo!"
 		else:
 			ability_label.text = ""
 			cooldown_label.text = ""
 	else:
-		mask_label.text = "Mask: None (collect from enemies)"
+		mask_label.text = "Máscara: Ninguna (obtén de enemigos)"
 		stats_label.text = ""
 		ability_label.text = ""
 		cooldown_label.text = ""

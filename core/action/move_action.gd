@@ -50,4 +50,4 @@ func _check_mask_pickup(pos: Vector2i) -> void:
 			if mask:
 				entity.mask_inventory.add_mask(mask)
 				EventBus.mask_picked_up.emit(mask, entity)
-				EventBus.message_logged.emit("Picked up " + mask.mask_name + " mask!", Color.GREEN)
+				EventBus.message_logged.emit("¡Recogiste la máscara de " + mask.mask_name + "!", Color.GREEN)
