@@ -19,7 +19,9 @@ const ENEMY_TYPES = [
 	preload("res://enemies/goblin.gd"),
 	preload("res://enemies/slime.gd"),
 	preload("res://enemies/skeleton.gd"),
-	preload("res://enemies/ghost.gd")
+	preload("res://enemies/ghost.gd"),
+	preload("res://enemies/fairy.gd"),
+	preload("res://enemies/demon.gd")
 ]
 
 func _ready() -> void:
@@ -170,8 +172,11 @@ func _spawn_enemies() -> void:
 	available_types.append(ENEMY_TYPES[1])
 	if floor_num >= 2:
 		available_types.append(ENEMY_TYPES[2])
+		available_types.append(ENEMY_TYPES[4])
 	if floor_num >= 3:
 		available_types.append(ENEMY_TYPES[3])
+	if floor_num >= 4:
+		available_types.append(ENEMY_TYPES[5])
 
 	for room_idx in range(1, current_level.rooms.size()):
 		if room_idx >= enemy_count:
@@ -272,6 +277,10 @@ func _use_mask_ability() -> void:
 			_ability_split()
 		"Lanzar Hueso":
 			_ability_bone_throw()
+		"Explosión":
+			_ability_explosion()
+		"Centelleo":
+			_ability_blink()
 		"Fase":
 			EventBus.message_logged.emit("¡Fase es pasiva - atraviesa muros!", Color.CYAN)
 			return
@@ -345,3 +354,46 @@ func _break_equipped_mask() -> void:
 	player.mask_inventory.remove_mask(player.mask_inventory.equipped_index)
 	EventBus.message_logged.emit("¡La máscara de " + mask_name + " se rompe!", Color.ORANGE)
 	EventBus.ui_update_requested.emit()
+
+func _ability_explosion() -> void:
+	var aoe_positions = [
+		Vector2i(-1, -1), Vector2i(0, -1), Vector2i(1, -1),
+		Vector2i(-1, 0), Vector2i(1, 0),
+		Vector2i(-1, 1), Vector2i(0, 1), Vector2i(1, 1)
+	]
+	var hit_count = 0
+	var damage = player.get_total_attack() + 2
+
+	for offset in aoe_positions:
+		var target_pos = player.grid_position + offset
+		var entity = GameState.get_entity_at(target_pos)
+		if entity and entity != player:
+			var actual_damage = entity.take_damage(damage)
+			EventBus.entity_attacked.emit(player, entity, actual_damage)
+			hit_count += 1
+
+	renderer.spawn_floating_text(player.grid_position, "BOOM", Color.ORANGE_RED)
+	if hit_count > 0:
+		EventBus.message_logged.emit("¡Explosión golpea a " + str(hit_count) + " enemigos!", Color.ORANGE_RED)
+	else:
+		EventBus.message_logged.emit("¡Explosión no alcanza a nadie!", Color.GRAY)
+
+func _ability_blink() -> void:
+	var valid_positions: Array[Vector2i] = []
+	var search_radius = 6
+
+	for y in range(-search_radius, search_radius + 1):
+		for x in range(-search_radius, search_radius + 1):
+			if x == 0 and y == 0:
+				continue
+			var pos = player.grid_position + Vector2i(x, y)
+			if current_level.is_walkable(pos) and GameState.get_entity_at(pos) == null:
+				valid_positions.append(pos)
+
+	if valid_positions.size() > 0:
+		var new_pos = valid_positions[randi() % valid_positions.size()]
+		player.set_grid_position(new_pos)
+		renderer.spawn_floating_text(new_pos, "✦", Color.MAGENTA)
+		EventBus.message_logged.emit("¡Te teletransportas a una nueva posición!", Color.MAGENTA)
+	else:
+		EventBus.message_logged.emit("¡No hay espacio para teletransportarse!", Color.GRAY)

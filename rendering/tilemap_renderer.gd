@@ -56,6 +56,8 @@ func _preload_sprites() -> void:
 		"slime": "res://sprites/slime.png",
 		"skeleton": "res://sprites/skeleton.png",
 		"ghost": "res://sprites/ghost.png",
+		"fairy": "res://sprites/fairy.png",
+		"demon": "res://sprites/demon.png",
 		"mask": "res://sprites/mask.png",
 	}
 
@@ -371,6 +373,10 @@ func _get_entity_sprite_key(entity: Entity) -> String:
 		return "skeleton"
 	if entity is Ghost:
 		return "ghost"
+	if entity is Fairy:
+		return "fairy"
+	if entity is Demon:
+		return "demon"
 	return ""
 
 func _create_sprite(key: String) -> Sprite2D:

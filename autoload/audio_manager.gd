@@ -14,6 +14,8 @@ const SFX_PATHS = {
 	"death_slime": "res://audio/sfx/slime-death.wav",
 	"death_skeleton": "res://audio/sfx/skeleton-death.wav",
 	"death_ghost": "res://audio/sfx/ghost-death.wav",
+	"death_fairy": "res://audio/sfx/fairy-death.wav",
+	"death_demon": "res://audio/sfx/demon-death.wav",
 }
 
 const DEATH_SFX_MAP = {
@@ -21,6 +23,8 @@ const DEATH_SFX_MAP = {
 	"Slime": "death_slime",
 	"Esqueleto": "death_skeleton",
 	"Fantasma": "death_ghost",
+	"Hada": "death_fairy",
+	"Demonio": "death_demon",
 }
 
 func _ready() -> void:
