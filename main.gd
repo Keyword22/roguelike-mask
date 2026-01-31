@@ -33,7 +33,7 @@ func _setup_camera() -> void:
 
 func _setup_renderer() -> void:
 	renderer = TilemapRenderer.new()
-	#renderer.tileset_resource = load("res://tilesets/dungeon.tres")
+	renderer.tileset_resource = load("res://tilesets/dungeon.tres")
 	add_child(renderer)
 
 func _setup_ui() -> void:

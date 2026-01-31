@@ -256,16 +256,21 @@ func _update_entity_visibility() -> void:
 
 class FogOverlay extends Node2D:
 	var renderer: TilemapRenderer
+	const PADDING = 30
 
 	func _draw() -> void:
 		if not renderer or not renderer.level:
 			return
 		var lvl = renderer.level
-		for y in lvl.height:
-			for x in lvl.width:
+
+		for y in range(-PADDING, lvl.height + PADDING):
+			for x in range(-PADDING, lvl.width + PADDING):
 				var pos = Vector2i(x, y)
 				var rect = Rect2(x * TilemapRenderer.TILE_SIZE, y * TilemapRenderer.TILE_SIZE, TilemapRenderer.TILE_SIZE, TilemapRenderer.TILE_SIZE)
-				if not lvl.is_tile_explored(pos):
+
+				if not lvl.is_in_bounds(pos):
+					draw_rect(rect, TilemapRenderer.COLOR_UNEXPLORED)
+				elif not lvl.is_tile_explored(pos):
 					draw_rect(rect, TilemapRenderer.COLOR_UNEXPLORED)
 				elif not lvl.is_tile_visible(pos):
 					draw_rect(rect, TilemapRenderer.COLOR_EXPLORED)
