@@ -278,24 +278,26 @@ func _use_mask_ability() -> void:
 		EventBus.message_logged.emit("Habilidad en enfriamiento: " + str(mask.current_cooldown) + " turnos.", Color.GRAY)
 		return
 
+	var success = false
 	match mask.ability_name:
 		"Embestida":
-			_ability_rush()
+			success = _ability_rush()
 		"Curación":
-			_ability_heal()
+			success = _ability_heal()
 		"Explosión":
-			_ability_explosion()
+			success = _ability_explosion()
 		"Centelleo":
-			_ability_blink()
+			success = _ability_blink()
 		"Fase":
 			EventBus.message_logged.emit("¡Fase es pasiva - atraviesa muros!", Color.CYAN)
 			return
 
-	EventBus.mask_ability_used.emit(mask, player)
-	_break_equipped_mask()
-	TurnManager.execute_player_action(WaitAction.new(player))
+	if success:
+		EventBus.mask_ability_used.emit(mask, player)
+		_break_equipped_mask()
+		TurnManager.execute_player_action(WaitAction.new(player))
 
-func _ability_rush() -> void:
+func _ability_rush() -> bool:
 	var enemies = GameState.get_enemies()
 	var closest_enemy = null
 	var closest_dist = 999
@@ -325,12 +327,15 @@ func _ability_rush() -> void:
 		var actual_damage = closest_enemy.take_damage(damage)
 		EventBus.entity_attacked.emit(player, closest_enemy, actual_damage)
 		EventBus.message_logged.emit("¡Embestida golpea a " + closest_enemy.entity_name + " por " + str(actual_damage) + "!", Color.GREEN)
+		return true
 	else:
 		EventBus.message_logged.emit("¡No hay enemigo cercano para embestir!", Color.GRAY)
+		return false
 
-func _ability_heal() -> void:
+func _ability_heal() -> bool:
 	var heal_amount = player.heal(player.max_health / 3)
 	EventBus.message_logged.emit("¡Regeneración de limo cura " + str(heal_amount) + " VDA!", Color.LIME_GREEN)
+	return true
 
 func _break_equipped_mask() -> void:
 	var mask_name = player.mask_inventory.equipped_mask.mask_name
@@ -338,7 +343,7 @@ func _break_equipped_mask() -> void:
 	EventBus.message_logged.emit("¡La máscara de " + mask_name + " se rompe!", Color.ORANGE)
 	EventBus.ui_update_requested.emit()
 
-func _ability_explosion() -> void:
+func _ability_explosion() -> bool:
 	var aoe_positions = [
 		Vector2i(-1, -1), Vector2i(0, -1), Vector2i(1, -1),
 		Vector2i(-1, 0), Vector2i(1, 0),
@@ -355,13 +360,15 @@ func _ability_explosion() -> void:
 			EventBus.entity_attacked.emit(player, entity, actual_damage)
 			hit_count += 1
 
-	renderer.spawn_floating_text(player.grid_position, "BOOM", Color.ORANGE_RED)
 	if hit_count > 0:
+		renderer.spawn_floating_text(player.grid_position, "BOOM", Color.ORANGE_RED)
 		EventBus.message_logged.emit("¡Explosión golpea a " + str(hit_count) + " enemigos!", Color.ORANGE_RED)
+		return true
 	else:
-		EventBus.message_logged.emit("¡Explosión no alcanza a nadie!", Color.GRAY)
+		EventBus.message_logged.emit("¡No hay enemigos adyacentes para explotar!", Color.GRAY)
+		return false
 
-func _ability_blink() -> void:
+func _ability_blink() -> bool:
 	var valid_positions: Array[Vector2i] = []
 	var search_radius = 6
 
@@ -376,7 +383,9 @@ func _ability_blink() -> void:
 	if valid_positions.size() > 0:
 		var new_pos = valid_positions[randi() % valid_positions.size()]
 		player.set_grid_position(new_pos)
-		renderer.spawn_floating_text(new_pos, "✦", Color.MAGENTA)
+		renderer.spawn_floating_text(new_pos, "*", Color.MAGENTA)
 		EventBus.message_logged.emit("¡Te teletransportas a una nueva posición!", Color.MAGENTA)
+		return true
 	else:
 		EventBus.message_logged.emit("¡No hay espacio para teletransportarse!", Color.GRAY)
+		return false

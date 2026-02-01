@@ -64,7 +64,7 @@ func _preload_sprites() -> void:
 		"mask": "res://sprites/mask.png",
 		"stairs_down": "res://sprites/stairs_down.png",
 		"stairs_up": "res://sprites/stairs_up.png",
-		"projectile_fairy": "res://sprites/projectile_fairy.png",
+		"projectile_fairy": "res://sprites/fairy_projectile.png",
 		"projectile_demon": "res://sprites/projectile_demon.png",
 	}
 
