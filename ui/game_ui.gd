@@ -153,23 +153,22 @@ func _setup_right_panel() -> void:
 	right_panel.anchor_top = 0
 	right_panel.offset_top = 10
 	right_panel.offset_right = -10
+	right_panel.offset_left = -270
+	right_panel.custom_minimum_size = Vector2(0, 280)
 	add_child(right_panel)
 
 	var margin = MarginContainer.new()
-	margin.add_theme_constant_override("margin_left", 18)
-	margin.add_theme_constant_override("margin_right", 18)
-	margin.add_theme_constant_override("margin_top", 16)
-	margin.add_theme_constant_override("margin_bottom", 16)
+	margin.add_theme_constant_override("margin_left", 20)
+	margin.add_theme_constant_override("margin_right", 20)
+	margin.add_theme_constant_override("margin_top", 18)
+	margin.add_theme_constant_override("margin_bottom", 18)
 	if game_theme:
 		margin.theme = game_theme
 	right_panel.add_child(margin)
 
 	mask_display = MaskDisplay.new()
-	mask_display.custom_minimum_size = Vector2(170, 0)
+	mask_display.custom_minimum_size = Vector2(220, 0)
 	margin.add_child(mask_display)
-
-	# Position from right edge
-	right_panel.offset_left = -230
 
 func _setup_bottom_panel() -> void:
 	var bottom_panel = _create_nine_patch_panel()

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cu81sm1y6dbbk"
-path="res://.godot/imported/panel.png-4debde5d1941508c13098c29f52f1bf0.ctex"
+uid="uid://bpevna8d55p6b"
+path="res://.godot/imported/mask_slot_highlight.png-9154c2dc284e78773b66e4458c621c2b.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://ui/panel.png"
-dest_files=["res://.godot/imported/panel.png-4debde5d1941508c13098c29f52f1bf0.ctex"]
+source_file="res://ui/mask_slot_highlight.png"
+dest_files=["res://.godot/imported/mask_slot_highlight.png-9154c2dc284e78773b66e4458c621c2b.ctex"]
 
 [params]
 
