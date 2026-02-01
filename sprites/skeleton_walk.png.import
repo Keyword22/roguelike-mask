@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cuw2mtcv5tdss"
-path="res://.godot/imported/CH_SLIME-IDLE-RUN.png-5a372dfdc45b81f3b414a9ffc92f9dbb.ctex"
+uid="uid://ciylb3qsdoe82"
+path="res://.godot/imported/skeleton_walk.png-4b2555b40ec8a29ddd36ce939c92bdbe.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://tilesets/CH_SLIME-IDLE-RUN.png"
-dest_files=["res://.godot/imported/CH_SLIME-IDLE-RUN.png-5a372dfdc45b81f3b414a9ffc92f9dbb.ctex"]
+source_file="res://sprites/skeleton_walk.png"
+dest_files=["res://.godot/imported/skeleton_walk.png-4b2555b40ec8a29ddd36ce939c92bdbe.ctex"]
 
 [params]
 

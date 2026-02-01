@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bb2nbadloijru"
-path="res://.godot/imported/image.png-d3dd7b8afb4fe400c6c30d824bb6ce11.ctex"
+uid="uid://of4yrewkjbj2"
+path="res://.godot/imported/fairy_attack.png-8310cf6cd8b99beea768f98a9f5335a8.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://tilesets/image.png"
-dest_files=["res://.godot/imported/image.png-d3dd7b8afb4fe400c6c30d824bb6ce11.ctex"]
+source_file="res://sprites/fairy_attack.png"
+dest_files=["res://.godot/imported/fairy_attack.png-8310cf6cd8b99beea768f98a9f5335a8.ctex"]
 
 [params]
 

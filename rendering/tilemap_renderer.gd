@@ -13,6 +13,7 @@ var mask_nodes: Dictionary = {}
 
 var sprite_cache: Dictionary = {}
 var player_sprite_cache: Dictionary = {}
+var enemy_sprite_frames_cache: Dictionary = {}
 var player_node: AnimatedSprite2D = null
 var fog_overlay: Node2D = null
 var key_node: CanvasItem = null
@@ -49,12 +50,15 @@ func _ready() -> void:
 
 	_preload_sprites()
 	_preload_player_sprites()
+	_preload_enemy_animations()
 	_load_damage_font()
 
 func _load_damage_font() -> void:
 	var font_path = "res://ui/font/Retro Gaming.ttf"
 	if ResourceLoader.exists(font_path):
 		damage_font = load(font_path)
+
+const MASK_DROP_ORDER: Array[String] = ["skeleton", "demon", "ghost", "fairy", "orc", "slime", "goblin"]
 
 func _preload_sprites() -> void:
 	var paths = {
@@ -65,7 +69,7 @@ func _preload_sprites() -> void:
 		"ghost": "res://sprites/ghost.png",
 		"fairy": "res://sprites/fairy.png",
 		"demon": "res://sprites/demon.png",
-		"mask": "res://sprites/mask.png",
+		"mask_drops": "res://sprites/mask_drops.png",
 		"stairs_down": "res://sprites/stairs_down.png",
 		"stairs_up": "res://sprites/stairs_up.png",
 		"projectile_fairy": "res://sprites/fairy_projectile.png",
@@ -79,6 +83,21 @@ func _preload_sprites() -> void:
 		if ResourceLoader.exists(paths[key]):
 			sprite_cache[key] = load(paths[key])
 
+const MASK_DROP_SIZE: int = 16
+
+func _get_mask_drop_texture(sprite_id: String) -> Texture2D:
+	if not has_sprite("mask_drops"):
+		return null
+
+	var index = MASK_DROP_ORDER.find(sprite_id)
+	if index == -1:
+		return null
+
+	var atlas = AtlasTexture.new()
+	atlas.atlas = sprite_cache["mask_drops"]
+	atlas.region = Rect2(0, index * MASK_DROP_SIZE, MASK_DROP_SIZE, MASK_DROP_SIZE)
+	return atlas
+
 func has_sprite(key: String) -> bool:
 	return sprite_cache.has(key)
 
@@ -90,6 +109,71 @@ func _preload_player_sprites() -> void:
 		player_sprite_cache["base"] = load(base_path)
 	if ResourceLoader.exists(fallback_path):
 		player_sprite_cache["fallback"] = load(fallback_path)
+
+func _preload_enemy_animations() -> void:
+	var enemies = ["goblin", "slime", "skeleton", "ghost", "demon", "fairy"]
+	for enemy_name in enemies:
+		_load_enemy_sprite_frames(enemy_name)
+
+const ENEMY_FRAME_SIZE: int = 32
+const ENEMY_FRAME_STRIDE: int = 48  # 32px frame + 16px gap
+
+func _load_enemy_sprite_frames(enemy_name: String) -> void:
+	var idle_path = "res://sprites/" + enemy_name + "_idle.png"
+	var walk_path = "res://sprites/" + enemy_name + "_walk.png"
+	var attack_path = "res://sprites/" + enemy_name + "_attack.png"
+
+	if not ResourceLoader.exists(idle_path):
+		return
+
+	var frames = SpriteFrames.new()
+	if frames.has_animation("default"):
+		frames.remove_animation("default")
+
+	# Idle animation - 4 frames at 32x32 with 16px gaps
+	frames.add_animation("idle")
+	frames.set_animation_loop("idle", true)
+	frames.set_animation_speed("idle", 6.0)
+	if ResourceLoader.exists(idle_path):
+		var idle_tex = load(idle_path)
+		_add_enemy_frames(frames, "idle", idle_tex, 4, ENEMY_FRAME_STRIDE)
+
+	# Walk animation - 4 frames at 32x32 with 16px gaps
+	frames.add_animation("walk")
+	frames.set_animation_loop("walk", true)
+	frames.set_animation_speed("walk", 8.0)
+	if ResourceLoader.exists(walk_path):
+		var walk_tex = load(walk_path)
+		_add_enemy_frames(frames, "walk", walk_tex, 4, ENEMY_FRAME_STRIDE)
+
+	# Attack animation - 3 frames with 16px gaps, last frame is 48x32
+	frames.add_animation("attack")
+	frames.set_animation_loop("attack", false)
+	frames.set_animation_speed("attack", 8.0)
+	if ResourceLoader.exists(attack_path):
+		var attack_tex = load(attack_path)
+		_add_enemy_attack_frames(frames, attack_tex)
+
+	enemy_sprite_frames_cache[enemy_name] = frames
+
+func _add_enemy_frames(frames: SpriteFrames, anim_name: String, texture: Texture2D, frame_count: int, stride: int) -> void:
+	for i in frame_count:
+		var atlas = AtlasTexture.new()
+		atlas.atlas = texture
+		atlas.region = Rect2(i * stride, 0, ENEMY_FRAME_SIZE, ENEMY_FRAME_SIZE)
+		frames.add_frame(anim_name, atlas)
+
+func _add_enemy_attack_frames(frames: SpriteFrames, texture: Texture2D) -> void:
+	# Frame 0: 32x32 at x=0
+	var atlas0 = AtlasTexture.new()
+	atlas0.atlas = texture
+	atlas0.region = Rect2(0, 0, ENEMY_FRAME_SIZE, ENEMY_FRAME_SIZE)
+	frames.add_frame("attack", atlas0)
+	# Frame 1: 48x32 at x=48
+	var atlas1 = AtlasTexture.new()
+	atlas1.atlas = texture
+	atlas1.region = Rect2(ENEMY_FRAME_STRIDE, 0, 48, ENEMY_FRAME_SIZE)
+	frames.add_frame("attack", atlas1)
 
 func _get_player_texture(sprite_id: String) -> Texture2D:
 	if player_sprite_cache.has(sprite_id):
@@ -105,30 +189,44 @@ func _get_player_texture(sprite_id: String) -> Texture2D:
 
 	return player_sprite_cache.get("base", null)
 
-func _create_player_sprite_frames(texture: Texture2D) -> SpriteFrames:
+func _create_player_sprite_frames(texture: Texture2D, sprite_id: String) -> SpriteFrames:
 	var frames = SpriteFrames.new()
-
-	frames.add_animation("idle")
-	frames.set_animation_loop("idle", true)
-	frames.set_animation_speed("idle", 1)
-	var idle_atlas = AtlasTexture.new()
-	idle_atlas.atlas = texture
-	idle_atlas.region = Rect2(0, 0, TILE_SIZE, TILE_SIZE)
-	frames.add_frame("idle", idle_atlas)
+	if frames.has_animation("default"):
+		frames.remove_animation("default")
 
 	var frame_count = texture.get_width() / TILE_SIZE
 
+	# Idle animation - top row, 4 frames
+	frames.add_animation("idle")
+	frames.set_animation_loop("idle", true)
+	frames.set_animation_speed("idle", 6.0)
+	for i in frame_count:
+		var idle_atlas = AtlasTexture.new()
+		idle_atlas.atlas = texture
+		idle_atlas.region = Rect2(i * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE)
+		frames.add_frame("idle", idle_atlas)
+
+	# Walk animation - bottom row, 4 frames
 	frames.add_animation("walk")
 	frames.set_animation_loop("walk", true)
-	frames.set_animation_speed("walk", 4)
+	frames.set_animation_speed("walk", 8.0)
 	for i in frame_count:
 		var walk_atlas = AtlasTexture.new()
 		walk_atlas.atlas = texture
-		walk_atlas.region = Rect2(i * TILE_SIZE, 0, TILE_SIZE, TILE_SIZE)
+		walk_atlas.region = Rect2(i * TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_SIZE)
 		frames.add_frame("walk", walk_atlas)
 
-	if frames.has_animation("default"):
-		frames.remove_animation("default")
+	# Attack animation - separate file, 1 frame
+	frames.add_animation("attack")
+	frames.set_animation_loop("attack", false)
+	frames.set_animation_speed("attack", 8.0)
+	var attack_path = "res://sprites/player/" + sprite_id + "_attack.png"
+	if ResourceLoader.exists(attack_path):
+		var attack_tex = load(attack_path)
+		var attack_atlas = AtlasTexture.new()
+		attack_atlas.atlas = attack_tex
+		attack_atlas.region = Rect2(0, 0, TILE_SIZE, TILE_SIZE)
+		frames.add_frame("attack", attack_atlas)
 
 	return frames
 
@@ -412,7 +510,9 @@ func render_entity(entity: Entity) -> void:
 		player_node = node as AnimatedSprite2D
 	else:
 		var sprite_key = _get_entity_sprite_key(entity)
-		if has_sprite(sprite_key):
+		if enemy_sprite_frames_cache.has(sprite_key):
+			node = _create_enemy_animated_sprite(sprite_key)
+		elif has_sprite(sprite_key):
 			node = _create_sprite(sprite_key)
 		else:
 			node = _create_entity_label(entity)
@@ -420,6 +520,28 @@ func render_entity(entity: Entity) -> void:
 	_set_node_position(node, entity.grid_position)
 	node.z_index = 1
 	entity_nodes[entity] = node
+
+func _create_enemy_animated_sprite(sprite_key: String) -> AnimatedSprite2D:
+	var anim_sprite = AnimatedSprite2D.new()
+	anim_sprite.sprite_frames = enemy_sprite_frames_cache[sprite_key]
+	anim_sprite.centered = false
+	anim_sprite.play("idle")
+	anim_sprite.animation_finished.connect(_on_animation_finished.bind(anim_sprite))
+	add_child(anim_sprite)
+	return anim_sprite
+
+func _on_animation_finished(sprite: AnimatedSprite2D) -> void:
+	if sprite.animation != "idle" and sprite.sprite_frames.has_animation("idle"):
+		sprite.play("idle")
+
+func _play_entity_animation(entity: Entity, anim_name: String) -> void:
+	if not entity_nodes.has(entity):
+		return
+	var node = entity_nodes[entity]
+	if node is AnimatedSprite2D:
+		var sprite = node as AnimatedSprite2D
+		if sprite.sprite_frames.has_animation(anim_name):
+			sprite.play(anim_name)
 
 func _create_player_animated_sprite(player: Player) -> AnimatedSprite2D:
 	var sprite_id = "base"
@@ -432,9 +554,10 @@ func _create_player_animated_sprite(player: Player) -> AnimatedSprite2D:
 		return null
 
 	var anim_sprite = AnimatedSprite2D.new()
-	anim_sprite.sprite_frames = _create_player_sprite_frames(texture)
+	anim_sprite.sprite_frames = _create_player_sprite_frames(texture, sprite_id)
 	anim_sprite.centered = false
 	anim_sprite.play("idle")
+	anim_sprite.animation_finished.connect(_on_animation_finished.bind(anim_sprite))
 	add_child(anim_sprite)
 	return anim_sprite
 
@@ -448,7 +571,7 @@ func _update_player_sprite(player: Player) -> void:
 
 	var texture = _get_player_texture(sprite_id)
 	if texture:
-		player_node.sprite_frames = _create_player_sprite_frames(texture)
+		player_node.sprite_frames = _create_player_sprite_frames(texture, sprite_id)
 		player_node.play("idle")
 
 func _get_entity_sprite_key(entity: Entity) -> String:
@@ -538,6 +661,7 @@ func _on_entity_moved(entity: Entity, from: Vector2i, to: Vector2i) -> void:
 		_update_fov()
 	else:
 		update_entity_position(entity)
+		_play_entity_animation(entity, "walk")
 
 var player_tween: Tween
 
@@ -573,11 +697,12 @@ func _on_mask_dropped(mask: Mask, pos: Vector2i) -> void:
 	var key = str(pos.x) + "," + str(pos.y)
 	var node: CanvasItem
 
-	if has_sprite("mask"):
+	var mask_texture = _get_mask_drop_texture(mask.sprite_id)
+	if mask_texture:
 		var sprite = Sprite2D.new()
-		sprite.texture = sprite_cache["mask"]
+		sprite.texture = mask_texture
 		sprite.centered = false
-		sprite.modulate = mask.color
+		sprite.offset = Vector2((TILE_SIZE - MASK_DROP_SIZE) / 2.0, (TILE_SIZE - MASK_DROP_SIZE) / 2.0)
 		add_child(sprite)
 		node = sprite
 	else:
@@ -609,13 +734,16 @@ func _on_mask_equipped(_mask: Mask, entity: Entity) -> void:
 	if entity is Player:
 		_update_player_sprite(entity as Player)
 
-func _on_entity_attacked(_attacker: Entity, target: Entity, damage: int) -> void:
+func _on_entity_attacked(attacker: Entity, target: Entity, damage: int) -> void:
+	_play_entity_animation(attacker, "attack")
 	if damage == 0:
 		spawn_floating_text(target.grid_position, "MISS", Color.GRAY)
 	else:
 		spawn_floating_text(target.grid_position, str(damage), Color.RED)
 
 func _on_entity_ranged_attack(attacker: Entity, target: Entity, damage: int) -> void:
+	_play_entity_animation(attacker, "attack")
+
 	var sprite_key = ""
 	var fallback_color = Color.WHITE
 	var fallback_symbol = "*"

@@ -61,6 +61,8 @@ func _on_entity_attacked(_attacker: Entity, _target: Entity, damage: int) -> voi
 func _on_entity_died(entity: Entity) -> void:
 	if DEATH_SFX_MAP.has(entity.entity_name):
 		play_sfx_by_name(DEATH_SFX_MAP[entity.entity_name])
+	elif entity is Enemy:
+		play_sfx_by_name("death_goblin")
 
 func play_sfx_by_name(sfx_name: String, volume_db: float = 0.0) -> void:
 	if sfx_cache.has(sfx_name):

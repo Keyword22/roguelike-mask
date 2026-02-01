@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ctnce64ttac83"
-path="res://.godot/imported/enemies.png-d75b92fa93ecd06351b9ea1ad544319e.ctex"
+uid="uid://cjlyo87crrv8l"
+path="res://.godot/imported/mask_drops.png-6ce065b65d5db369ab7eefe544891ca0.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://tilesets/enemies.png"
-dest_files=["res://.godot/imported/enemies.png-d75b92fa93ecd06351b9ea1ad544319e.ctex"]
+source_file="res://sprites/mask_drops.png"
+dest_files=["res://.godot/imported/mask_drops.png-6ce065b65d5db369ab7eefe544891ca0.ctex"]
 
 [params]
 
