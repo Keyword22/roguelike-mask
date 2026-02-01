@@ -58,6 +58,20 @@ func _update() -> void:
 		if mask.has_ability():
 			ability_label.text = "[Q] " + mask.ability_name
 			cooldown_label.text = "(¡Se rompe!)"
+		elif mask.can_phase and mask.phase_uses > 0:
+			ability_label.text = "Atravesar muros"
+			cooldown_label.text = "Usos: " + str(mask.phase_uses_remaining) + "/" + str(mask.phase_uses)
+		elif mask.has_reactive_effect():
+			match mask.reactive_effect:
+				"teleport_on_hit":
+					ability_label.text = "Al recibir daño:"
+					cooldown_label.text = "Teletransporte"
+				"revive":
+					ability_label.text = "Al morir:"
+					cooldown_label.text = "Revivir con 1 VDA"
+				_:
+					ability_label.text = ""
+					cooldown_label.text = ""
 		else:
 			ability_label.text = ""
 			cooldown_label.text = ""

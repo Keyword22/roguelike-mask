@@ -23,13 +23,19 @@ func execute() -> bool:
 		return attack_action.execute()
 
 	var can_move = level.is_walkable(new_pos)
+	var used_phase = false
 
-	if not can_move and entity is Player:
-		if entity.can_phase_through_walls():
+	if not can_move:
+		if entity is Player and entity.can_phase_through_walls():
+			can_move = level.is_in_bounds(new_pos)
+			used_phase = true
+		elif entity is Ghost:
 			can_move = level.is_in_bounds(new_pos)
 
 	if can_move:
 		entity.set_grid_position(new_pos)
+		if used_phase and entity is Player:
+			entity.use_phase()
 		_check_stairs(new_pos)
 		_check_mask_pickup(new_pos)
 		return true

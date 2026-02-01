@@ -1,6 +1,8 @@
 class_name Skeleton
 extends Enemy
 
+var has_resurrected: bool = false
+
 func _ready() -> void:
 	display_char = "S"
 	display_color = Color.WHITE
@@ -17,9 +19,16 @@ func _ready() -> void:
 	skeleton_mask.color = Color.WHITE
 	skeleton_mask.attack_bonus = 1
 	skeleton_mask.defense_bonus = 1
-	skeleton_mask.ability_name = "Lanzar Hueso"
-	skeleton_mask.ability_cooldown = 3
+	skeleton_mask.reactive_effect = "revive"
 	skeleton_mask.sprite_id = "skeleton"
 	mask_drop = skeleton_mask
 
 	super._ready()
+
+func die() -> void:
+	if not has_resurrected:
+		has_resurrected = true
+		health = max_health / 2
+		EventBus.message_logged.emit("¡El Esqueleto se reconstruye!", Color.WHITE)
+		return
+	super.die()

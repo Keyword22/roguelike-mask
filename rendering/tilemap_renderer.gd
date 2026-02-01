@@ -61,6 +61,8 @@ func _preload_sprites() -> void:
 		"fairy": "res://sprites/fairy.png",
 		"demon": "res://sprites/demon.png",
 		"mask": "res://sprites/mask.png",
+		"stairs_down": "res://sprites/stairs_down.png",
+		"stairs_up": "res://sprites/stairs_up.png",
 	}
 
 	for key in paths:
@@ -185,50 +187,35 @@ func _render_level_with_terrains() -> void:
 
 	_place_stairs()
 
-var stairs_down_atlas: Vector2i = Vector2i(-1, -1)
-var stairs_up_atlas: Vector2i = Vector2i(-1, -1)
-
 func _place_stairs() -> void:
-	if stairs_down_atlas == Vector2i(-1, -1) and stairs_up_atlas == Vector2i(-1, -1):
-		_place_stairs_as_labels()
-		return
-
-	for y in level.height:
-		for x in level.width:
-			var pos = Vector2i(x, y)
-			var tile = level.get_tile(pos)
-			if tile == Level.TileType.STAIRS_DOWN and stairs_down_atlas != Vector2i(-1, -1):
-				tile_map.set_cell(pos, 0, stairs_down_atlas)
-			elif tile == Level.TileType.STAIRS_UP and stairs_up_atlas != Vector2i(-1, -1):
-				tile_map.set_cell(pos, 0, stairs_up_atlas)
-
-func _place_stairs_as_labels() -> void:
 	for y in level.height:
 		for x in level.width:
 			var pos = Vector2i(x, y)
 			var tile = level.get_tile(pos)
 			if tile == Level.TileType.STAIRS_DOWN:
-				var label = Label.new()
-				label.text = ">"
-				label.add_theme_font_size_override("font_size", FONT_SIZE)
-				label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.2))
-				label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-				label.custom_minimum_size = Vector2(TILE_SIZE, TILE_SIZE)
-				label.position = Vector2(pos.x * TILE_SIZE, pos.y * TILE_SIZE)
-				label.z_index = 1
-				add_child(label)
+				_place_stair_at(pos, "stairs_down", ">", Color(0.9, 0.9, 0.2))
 			elif tile == Level.TileType.STAIRS_UP:
-				var label = Label.new()
-				label.text = "<"
-				label.add_theme_font_size_override("font_size", FONT_SIZE)
-				label.add_theme_color_override("font_color", Color(0.2, 0.9, 0.9))
-				label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-				label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-				label.custom_minimum_size = Vector2(TILE_SIZE, TILE_SIZE)
-				label.position = Vector2(pos.x * TILE_SIZE, pos.y * TILE_SIZE)
-				label.z_index = 1
-				add_child(label)
+				_place_stair_at(pos, "stairs_up", "<", Color(0.2, 0.9, 0.9))
+
+func _place_stair_at(pos: Vector2i, sprite_key: String, fallback_char: String, fallback_color: Color) -> void:
+	if has_sprite(sprite_key):
+		var sprite = Sprite2D.new()
+		sprite.texture = sprite_cache[sprite_key]
+		sprite.centered = false
+		sprite.position = Vector2(pos.x * TILE_SIZE, pos.y * TILE_SIZE)
+		sprite.z_index = 1
+		add_child(sprite)
+	else:
+		var label = Label.new()
+		label.text = fallback_char
+		label.add_theme_font_size_override("font_size", FONT_SIZE)
+		label.add_theme_color_override("font_color", fallback_color)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.custom_minimum_size = Vector2(TILE_SIZE, TILE_SIZE)
+		label.position = Vector2(pos.x * TILE_SIZE, pos.y * TILE_SIZE)
+		label.z_index = 1
+		add_child(label)
 
 func _render_level_with_labels() -> void:
 	tile_map = TileMapLayer.new()

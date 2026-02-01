@@ -55,10 +55,67 @@ func recalculate_stats() -> void:
 func take_damage(amount: int) -> int:
 	var actual_damage = max(0, amount - get_total_defense())
 	health -= actual_damage
+
+	if actual_damage > 0:
+		var reactive_result = _check_reactive_on_hit()
+		if reactive_result:
+			return actual_damage
+
 	if health <= 0:
 		health = 0
-		die()
+		if not _check_reactive_on_death():
+			die()
 	return actual_damage
+
+func _check_reactive_on_hit() -> bool:
+	if not mask_inventory.equipped_mask:
+		return false
+	var mask = mask_inventory.equipped_mask
+	if mask.reactive_effect == "teleport_on_hit":
+		EventBus.mask_ability_used.emit(mask, self)
+		_reactive_teleport()
+		_break_reactive_mask()
+		return true
+	return false
+
+func _check_reactive_on_death() -> bool:
+	if not mask_inventory.equipped_mask:
+		return false
+	var mask = mask_inventory.equipped_mask
+	if mask.reactive_effect == "revive":
+		health = 1
+		EventBus.message_logged.emit("¡La máscara de " + mask.mask_name + " te revive!", Color.GOLD)
+		EventBus.mask_ability_used.emit(mask, self)
+		_break_reactive_mask()
+		return true
+	return false
+
+func _reactive_teleport() -> void:
+	var level = GameState.current_level
+	var valid_positions: Array[Vector2i] = []
+	var search_radius = 8
+
+	for y in range(-search_radius, search_radius + 1):
+		for x in range(-search_radius, search_radius + 1):
+			if x == 0 and y == 0:
+				continue
+			var dist = abs(x) + abs(y)
+			if dist < 5:
+				continue
+			var pos = grid_position + Vector2i(x, y)
+			if level.is_walkable(pos) and GameState.get_entity_at(pos) == null:
+				valid_positions.append(pos)
+
+	if valid_positions.size() > 0:
+		var new_pos = valid_positions[randi() % valid_positions.size()]
+		set_grid_position(new_pos)
+		EventBus.message_logged.emit("¡Te teletransportas lejos del peligro!", Color.MAGENTA)
+
+func _break_reactive_mask() -> void:
+	var mask_name = mask_inventory.equipped_mask.mask_name
+	mask_inventory.remove_mask(mask_inventory.equipped_index)
+	EventBus.message_logged.emit("¡La máscara de " + mask_name + " se rompe!", Color.ORANGE)
+	EventBus.ui_update_requested.emit()
 
 func die() -> void:
 	GameState.game_over(false)
@@ -66,8 +123,16 @@ func die() -> void:
 
 func can_phase_through_walls() -> bool:
 	if mask_inventory.equipped_mask:
-		return mask_inventory.equipped_mask.can_phase
+		return mask_inventory.equipped_mask.can_still_phase()
 	return false
+
+func use_phase() -> void:
+	if mask_inventory.equipped_mask and mask_inventory.equipped_mask.phase_uses > 0:
+		var broke = mask_inventory.equipped_mask.use_phase()
+		EventBus.message_logged.emit("¡Atraviesas la pared! (Usos restantes: " + str(mask_inventory.equipped_mask.phase_uses_remaining) + ")", Color.LIGHT_BLUE)
+		if broke:
+			_break_reactive_mask()
+		EventBus.ui_update_requested.emit()
 
 func get_display_char() -> String:
 	if mask_inventory.equipped_mask:

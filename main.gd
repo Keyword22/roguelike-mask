@@ -274,10 +274,8 @@ func _use_mask_ability() -> void:
 	match mask.ability_name:
 		"Embestida":
 			_ability_rush()
-		"División":
-			_ability_split()
-		"Lanzar Hueso":
-			_ability_bone_throw()
+		"Curación":
+			_ability_heal()
 		"Explosión":
 			_ability_explosion()
 		"Centelleo":
@@ -316,39 +314,16 @@ func _ability_rush() -> void:
 			else:
 				break
 
-		EventBus.message_logged.emit("¡Embestida hacia " + closest_enemy.entity_name + "!", Color.GREEN)
+		var damage = player.get_total_attack() + 2
+		var actual_damage = closest_enemy.take_damage(damage)
+		EventBus.entity_attacked.emit(player, closest_enemy, actual_damage)
+		EventBus.message_logged.emit("¡Embestida golpea a " + closest_enemy.entity_name + " por " + str(actual_damage) + "!", Color.GREEN)
 	else:
 		EventBus.message_logged.emit("¡No hay enemigo cercano para embestir!", Color.GRAY)
 
-func _ability_split() -> void:
-	var heal_amount = player.heal(player.max_health / 4)
+func _ability_heal() -> void:
+	var heal_amount = player.heal(player.max_health / 3)
 	EventBus.message_logged.emit("¡Regeneración de limo cura " + str(heal_amount) + " VDA!", Color.LIME_GREEN)
-
-func _ability_bone_throw() -> void:
-	var directions = [Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1)]
-	var hit_enemy = null
-
-	for dir in directions:
-		for dist in range(1, 6):
-			var check_pos = player.grid_position + dir * dist
-			if not current_level.is_walkable(check_pos):
-				break
-			var entity = GameState.get_entity_at(check_pos)
-			if entity and entity != player:
-				hit_enemy = entity
-				break
-		if hit_enemy:
-			break
-
-	if hit_enemy:
-		var damage = player.get_total_attack()
-		var actual_damage = hit_enemy.take_damage(damage)
-		EventBus.entity_attacked.emit(player, hit_enemy, actual_damage)
-		EventBus.message_logged.emit("¡Lanzar hueso golpea a " + hit_enemy.entity_name + " por " + str(actual_damage) + "!", Color.WHITE)
-	else:
-		renderer.spawn_floating_text(player.grid_position, "MISS", Color.GRAY)
-		AudioManager.play_sfx_by_name("miss")
-		EventBus.message_logged.emit("¡Lanzar hueso falla!", Color.GRAY)
 
 func _break_equipped_mask() -> void:
 	var mask_name = player.mask_inventory.equipped_mask.mask_name

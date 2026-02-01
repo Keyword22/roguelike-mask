@@ -21,6 +21,7 @@ const SFX_PATHS = {
 const DEATH_SFX_MAP = {
 	"Goblin": "death_goblin",
 	"Slime": "death_slime",
+	"Mini Slime": "death_slime",
 	"Esqueleto": "death_skeleton",
 	"Fantasma": "death_ghost",
 	"Hada": "death_fairy",
