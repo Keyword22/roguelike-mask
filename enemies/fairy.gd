@@ -24,7 +24,7 @@ func _ready() -> void:
 	ai_controller = AIRanged.new()
 	ai_controller.entity = self
 	ai_controller.attack_range = 4
-	ai_controller.flee_when_close = true
+	ai_controller.flee_when_close = false
 
 func take_damage(amount: int) -> int:
 	var dmg = super.take_damage(amount)
