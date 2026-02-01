@@ -12,6 +12,9 @@ signal mask_picked_up(mask, entity)
 signal mask_equipped(mask, entity)
 signal mask_ability_used(mask, entity)
 
+signal key_picked_up(position)
+signal door_unlocked(position)
+
 signal level_generated(level)
 signal floor_changed(floor_number)
 signal stairs_entered(entity, direction)

@@ -26,7 +26,16 @@ func execute() -> bool:
 	var used_phase = false
 
 	if not can_move:
-		if entity is Player and entity.can_phase_through_walls():
+		if entity is Player and level.is_door_locked(new_pos):
+			if level.has_key_been_picked_up:
+				level.unlock_door(new_pos)
+				EventBus.message_logged.emit("¡Abres la puerta con la llave!", Color.GOLD)
+				EventBus.door_unlocked.emit(new_pos)
+				can_move = true
+			else:
+				EventBus.message_logged.emit("La puerta está cerrada. Necesitas una llave.", Color.GRAY)
+				return false
+		elif entity is Player and entity.can_phase_through_walls():
 			can_move = level.is_in_bounds(new_pos)
 			used_phase = true
 		elif entity is Ghost:
@@ -37,6 +46,7 @@ func execute() -> bool:
 		if used_phase and entity is Player:
 			entity.use_phase()
 		_check_stairs(new_pos)
+		_check_key_pickup(new_pos)
 		_check_mask_pickup(new_pos)
 		return true
 
@@ -47,6 +57,14 @@ func _check_stairs(pos: Vector2i) -> void:
 	if level and entity is Player:
 		if level.is_stairs_down(pos):
 			EventBus.stairs_entered.emit(entity, "down")
+
+func _check_key_pickup(pos: Vector2i) -> void:
+	if entity is Player:
+		var level = GameState.current_level
+		if level and level.has_key_at(pos):
+			level.pickup_key_at(pos)
+			EventBus.key_picked_up.emit(pos)
+			EventBus.message_logged.emit("¡Encontraste la llave!", Color.GOLD)
 
 func _check_mask_pickup(pos: Vector2i) -> void:
 	if entity is Player:

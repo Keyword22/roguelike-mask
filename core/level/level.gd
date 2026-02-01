@@ -10,8 +10,10 @@ var stairs_up_pos: Vector2i = Vector2i(-1, -1)
 var dropped_masks: Dictionary = {}
 var visible_tiles: Dictionary = {}
 var explored_tiles: Dictionary = {}
+var key_position: Vector2i = Vector2i(-1, -1)
+var has_key_been_picked_up: bool = false
 
-enum TileType { WALL, FLOOR, STAIRS_DOWN, STAIRS_UP }
+enum TileType { WALL, FLOOR, STAIRS_DOWN, STAIRS_UP, DOOR_LOCKED, DOOR_OPEN }
 
 func _ready() -> void:
 	GameState.set_level(self)
@@ -42,7 +44,25 @@ func is_walkable(pos: Vector2i) -> bool:
 	if not is_in_bounds(pos):
 		return false
 	var tile = get_tile(pos)
-	return tile != TileType.WALL
+	return tile != TileType.WALL and tile != TileType.DOOR_LOCKED
+
+func is_door_locked(pos: Vector2i) -> bool:
+	return get_tile(pos) == TileType.DOOR_LOCKED
+
+func unlock_door(pos: Vector2i) -> bool:
+	if is_door_locked(pos) and has_key_been_picked_up:
+		set_tile(pos, TileType.DOOR_OPEN)
+		return true
+	return false
+
+func has_key_at(pos: Vector2i) -> bool:
+	return pos == key_position and not has_key_been_picked_up
+
+func pickup_key_at(pos: Vector2i) -> bool:
+	if has_key_at(pos):
+		has_key_been_picked_up = true
+		return true
+	return false
 
 func is_stairs_down(pos: Vector2i) -> bool:
 	return get_tile(pos) == TileType.STAIRS_DOWN
@@ -114,7 +134,8 @@ func _mark_visible(pos: Vector2i) -> void:
 		explored_tiles[pos] = true
 
 func _blocks_light(pos: Vector2i) -> bool:
-	return get_tile(pos) == TileType.WALL
+	var tile = get_tile(pos)
+	return tile == TileType.WALL or tile == TileType.DOOR_LOCKED
 
 const OCTANT_TRANSFORMS = [
 	[1, 0, 0, 1],

@@ -15,6 +15,8 @@ var sprite_cache: Dictionary = {}
 var player_sprite_cache: Dictionary = {}
 var player_node: AnimatedSprite2D = null
 var fog_overlay: Node2D = null
+var key_node: CanvasItem = null
+var door_nodes: Dictionary = {}
 
 const COLOR_UNEXPLORED = Color(0, 0, 0, 1)
 const COLOR_EXPLORED = Color(0.1, 0.08, 0.05, 0.7)
@@ -42,6 +44,8 @@ func _ready() -> void:
 	EventBus.entity_attacked.connect(_on_entity_attacked)
 	EventBus.entity_ranged_attack.connect(_on_entity_ranged_attack)
 	EventBus.entity_healed.connect(_on_entity_healed)
+	EventBus.key_picked_up.connect(_on_key_picked_up)
+	EventBus.door_unlocked.connect(_on_door_unlocked)
 
 	_preload_sprites()
 	_preload_player_sprites()
@@ -66,6 +70,9 @@ func _preload_sprites() -> void:
 		"stairs_up": "res://sprites/stairs_up.png",
 		"projectile_fairy": "res://sprites/fairy_projectile.png",
 		"projectile_demon": "res://sprites/projectile_demon.png",
+		"key": "res://sprites/key.png",
+		"door_locked": "res://sprites/door_locked.png",
+		"door_open": "res://sprites/door_open.png",
 	}
 
 	for key in paths:
@@ -135,6 +142,8 @@ func render_level(lvl: Level) -> void:
 	else:
 		_render_level_with_labels()
 
+	_render_doors()
+	_render_key()
 	_create_fog_overlay()
 	_update_fov()
 
@@ -165,8 +174,10 @@ func _clear_all() -> void:
 	tile_map = null
 	fog_overlay = null
 	player_node = null
+	key_node = null
 	mask_nodes.clear()
 	entity_nodes.clear()
+	door_nodes.clear()
 
 func _render_level_with_terrains() -> void:
 	tile_map = TileMapLayer.new()
@@ -219,6 +230,89 @@ func _place_stair_at(pos: Vector2i, sprite_key: String, fallback_char: String, f
 		label.position = Vector2(pos.x * TILE_SIZE, pos.y * TILE_SIZE)
 		label.z_index = 1
 		add_child(label)
+
+func _render_doors() -> void:
+	door_nodes.clear()
+	for y in level.height:
+		for x in level.width:
+			var pos = Vector2i(x, y)
+			var tile = level.get_tile(pos)
+			if tile == Level.TileType.DOOR_LOCKED:
+				_place_door_at(pos, true)
+			elif tile == Level.TileType.DOOR_OPEN:
+				_place_door_at(pos, false)
+
+func _place_door_at(pos: Vector2i, locked: bool) -> void:
+	var sprite_key = "door_locked" if locked else "door_open"
+	var fallback_char = "+" if locked else "/"
+	var fallback_color = Color.SADDLE_BROWN if locked else Color.BURLYWOOD
+	var key = str(pos.x) + "," + str(pos.y)
+
+	if has_sprite(sprite_key):
+		var sprite = Sprite2D.new()
+		sprite.texture = sprite_cache[sprite_key]
+		sprite.centered = false
+		sprite.position = Vector2(pos.x * TILE_SIZE, pos.y * TILE_SIZE)
+		sprite.z_index = 2
+		add_child(sprite)
+		door_nodes[key] = sprite
+	else:
+		var label = Label.new()
+		label.text = fallback_char
+		label.add_theme_font_size_override("font_size", FONT_SIZE)
+		label.add_theme_color_override("font_color", fallback_color)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.custom_minimum_size = Vector2(TILE_SIZE, TILE_SIZE)
+		label.position = Vector2(pos.x * TILE_SIZE, pos.y * TILE_SIZE)
+		label.z_index = 2
+		add_child(label)
+		door_nodes[key] = label
+
+func _render_key() -> void:
+	if key_node and is_instance_valid(key_node):
+		key_node.queue_free()
+		key_node = null
+
+	if level.key_position == Vector2i(-1, -1) or level.has_key_been_picked_up:
+		return
+
+	var pos = level.key_position
+	if has_sprite("key"):
+		var sprite = Sprite2D.new()
+		sprite.texture = sprite_cache["key"]
+		sprite.centered = false
+		sprite.position = Vector2(pos.x * TILE_SIZE, pos.y * TILE_SIZE)
+		sprite.z_index = 3
+		add_child(sprite)
+		key_node = sprite
+	else:
+		var label = Label.new()
+		label.text = "k"
+		label.add_theme_font_size_override("font_size", FONT_SIZE)
+		label.add_theme_color_override("font_color", Color.GOLD)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.custom_minimum_size = Vector2(TILE_SIZE, TILE_SIZE)
+		label.position = Vector2(pos.x * TILE_SIZE, pos.y * TILE_SIZE)
+		label.z_index = 3
+		add_child(label)
+		key_node = label
+
+func _on_key_picked_up(_pos: Vector2i) -> void:
+	if key_node and is_instance_valid(key_node):
+		key_node.queue_free()
+		key_node = null
+
+func _on_door_unlocked(pos: Vector2i) -> void:
+	var key = str(pos.x) + "," + str(pos.y)
+	if door_nodes.has(key):
+		var old_node = door_nodes[key]
+		if is_instance_valid(old_node):
+			old_node.queue_free()
+		door_nodes.erase(key)
+	_place_door_at(pos, false)
+	_update_fov()
 
 func _render_level_with_labels() -> void:
 	tile_map = TileMapLayer.new()
