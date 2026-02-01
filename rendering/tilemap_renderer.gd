@@ -216,7 +216,7 @@ func _create_player_sprite_frames(texture: Texture2D, sprite_id: String) -> Spri
 		walk_atlas.region = Rect2(i * TILE_SIZE, TILE_SIZE, TILE_SIZE, TILE_SIZE)
 		frames.add_frame("walk", walk_atlas)
 
-	# Attack animation - separate file, 1 frame
+	# Attack animation - separate file, 1 frame at 48x32
 	frames.add_animation("attack")
 	frames.set_animation_loop("attack", false)
 	frames.set_animation_speed("attack", 8.0)
@@ -225,7 +225,7 @@ func _create_player_sprite_frames(texture: Texture2D, sprite_id: String) -> Spri
 		var attack_tex = load(attack_path)
 		var attack_atlas = AtlasTexture.new()
 		attack_atlas.atlas = attack_tex
-		attack_atlas.region = Rect2(0, 0, TILE_SIZE, TILE_SIZE)
+		attack_atlas.region = Rect2(0, 0, 48, TILE_SIZE)
 		frames.add_frame("attack", attack_atlas)
 
 	return frames
@@ -543,6 +543,19 @@ func _play_entity_animation(entity: Entity, anim_name: String) -> void:
 		if sprite.sprite_frames.has_animation(anim_name):
 			sprite.play(anim_name)
 
+func _update_entity_facing(entity: Entity, from: Vector2i, to: Vector2i, invert: bool = false) -> void:
+	if not entity_nodes.has(entity):
+		return
+	var node = entity_nodes[entity]
+	if node is AnimatedSprite2D:
+		var sprite = node as AnimatedSprite2D
+		var direction = to.x - from.x
+		var flip_right = not invert
+		if direction < 0:
+			sprite.flip_h = not flip_right
+		elif direction > 0:
+			sprite.flip_h = flip_right
+
 func _create_player_animated_sprite(player: Player) -> AnimatedSprite2D:
 	var sprite_id = "base"
 	if player.mask_inventory.equipped_mask and player.mask_inventory.equipped_mask.sprite_id != "":
@@ -656,6 +669,7 @@ func _on_entity_spawned(entity: Entity) -> void:
 		entity_nodes[entity].visible = false
 
 func _on_entity_moved(entity: Entity, from: Vector2i, to: Vector2i) -> void:
+	_update_entity_facing(entity, from, to)
 	if entity is Player and player_node:
 		_tween_player_move(from, to)
 		_update_fov()
@@ -735,6 +749,7 @@ func _on_mask_equipped(_mask: Mask, entity: Entity) -> void:
 		_update_player_sprite(entity as Player)
 
 func _on_entity_attacked(attacker: Entity, target: Entity, damage: int) -> void:
+	_update_entity_facing(attacker, attacker.grid_position, target.grid_position, true)
 	_play_entity_animation(attacker, "attack")
 	if damage == 0:
 		spawn_floating_text(target.grid_position, "MISS", Color.GRAY)
@@ -742,6 +757,7 @@ func _on_entity_attacked(attacker: Entity, target: Entity, damage: int) -> void:
 		spawn_floating_text(target.grid_position, str(damage), Color.RED)
 
 func _on_entity_ranged_attack(attacker: Entity, target: Entity, damage: int) -> void:
+	_update_entity_facing(attacker, attacker.grid_position, target.grid_position, true)
 	_play_entity_animation(attacker, "attack")
 
 	var sprite_key = ""
