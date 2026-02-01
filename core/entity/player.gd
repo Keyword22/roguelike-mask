@@ -112,10 +112,31 @@ func _reactive_teleport() -> void:
 		EventBus.message_logged.emit("¡Te teletransportas lejos del peligro!", Color.MAGENTA)
 
 func _break_reactive_mask() -> void:
-	var mask_name = mask_inventory.equipped_mask.mask_name
+	var mask_name_str = mask_inventory.equipped_mask.mask_name
 	mask_inventory.remove_mask(mask_inventory.equipped_index)
-	EventBus.message_logged.emit("¡La máscara de " + mask_name + " se rompe!", Color.ORANGE)
+	EventBus.message_logged.emit("¡La máscara de " + mask_name_str + " se rompe!", Color.ORANGE)
+	_check_stuck_in_wall()
 	EventBus.ui_update_requested.emit()
+
+func _check_stuck_in_wall() -> void:
+	var level = GameState.current_level
+	if not level:
+		return
+	if level.is_walkable(grid_position):
+		return
+
+	var directions = [
+		Vector2i(1, 0), Vector2i(-1, 0), Vector2i(0, 1), Vector2i(0, -1),
+		Vector2i(1, 1), Vector2i(-1, 1), Vector2i(1, -1), Vector2i(-1, -1)
+	]
+
+	for radius in range(1, 10):
+		for dir in directions:
+			var check_pos = grid_position + dir * radius
+			if level.is_walkable(check_pos) and GameState.get_entity_at(check_pos) == null:
+				set_grid_position(check_pos)
+				EventBus.message_logged.emit("¡Te expulsan de la pared!", Color.YELLOW)
+				return
 
 func die() -> void:
 	GameState.game_over(false)
@@ -129,9 +150,12 @@ func can_phase_through_walls() -> bool:
 func use_phase() -> void:
 	if mask_inventory.equipped_mask and mask_inventory.equipped_mask.phase_uses > 0:
 		var broke = mask_inventory.equipped_mask.use_phase()
-		EventBus.message_logged.emit("¡Atraviesas la pared! (Usos restantes: " + str(mask_inventory.equipped_mask.phase_uses_remaining) + ")", Color.LIGHT_BLUE)
+		var uses_left = mask_inventory.equipped_mask.phase_uses_remaining
 		if broke:
+			EventBus.message_logged.emit("¡Atraviesas la pared! (Último uso)", Color.LIGHT_BLUE)
 			_break_reactive_mask()
+		else:
+			EventBus.message_logged.emit("¡Atraviesas la pared! (Usos restantes: " + str(uses_left) + ")", Color.LIGHT_BLUE)
 		EventBus.ui_update_requested.emit()
 
 func get_display_char() -> String:

@@ -33,6 +33,8 @@ func remove_mask(index: int) -> Mask:
 		equipped_index = -1
 		if masks.size() > 0:
 			equip_mask(0)
+		else:
+			EventBus.mask_equipped.emit(null, get_parent())
 	elif equipped_index > index:
 		equipped_index -= 1
 	_update_player_stats()

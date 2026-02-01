@@ -192,12 +192,19 @@ func _spawn_enemies() -> void:
 
 func _update_camera() -> void:
 	if player:
-		camera.position = Vector2(
-			player.grid_position.x * AsciiRenderer.TILE_SIZE,
-			player.grid_position.y * AsciiRenderer.TILE_SIZE
-		)
+		var target_pos = renderer.get_player_visual_position()
+		if target_pos != Vector2.ZERO:
+			camera.position = target_pos
+		else:
+			camera.position = Vector2(
+				player.grid_position.x * TilemapRenderer.TILE_SIZE,
+				player.grid_position.y * TilemapRenderer.TILE_SIZE
+			)
 
 func _process(delta: float) -> void:
+	if GameState.current_state == GameState.State.PLAYING and player:
+		_update_camera()
+
 	if GameState.current_state != GameState.State.PLAYING:
 		return
 	if pause_menu.visible:

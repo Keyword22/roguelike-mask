@@ -444,6 +444,11 @@ func _on_entity_moved(entity: Entity, from: Vector2i, to: Vector2i) -> void:
 
 var player_tween: Tween
 
+func get_player_visual_position() -> Vector2:
+	if player_node and is_instance_valid(player_node):
+		return player_node.position
+	return Vector2.ZERO
+
 func _tween_player_move(from: Vector2i, to: Vector2i) -> void:
 	var from_pos = Vector2(from.x * TILE_SIZE, from.y * TILE_SIZE)
 	var to_pos = Vector2(to.x * TILE_SIZE, to.y * TILE_SIZE)
@@ -455,7 +460,7 @@ func _tween_player_move(from: Vector2i, to: Vector2i) -> void:
 	player_node.play("walk")
 
 	player_tween = create_tween()
-	player_tween.tween_property(player_node, "position", to_pos, 0.5).set_trans(Tween.TRANS_LINEAR)
+	player_tween.tween_property(player_node, "position", to_pos, 0.12).set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	player_tween.tween_callback(func():
 		if player_node and is_instance_valid(player_node):
 			player_node.play("idle")
@@ -503,7 +508,7 @@ func _on_mask_picked_up(_mask: Mask, _entity: Entity) -> void:
 				node.queue_free()
 			mask_nodes.erase(key)
 
-func _on_mask_equipped(mask: Mask, entity: Entity) -> void:
+func _on_mask_equipped(_mask: Mask, entity: Entity) -> void:
 	if entity is Player:
 		_update_player_sprite(entity as Player)
 
