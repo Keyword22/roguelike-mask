@@ -2,6 +2,7 @@ extends Node
 
 signal entity_moved(entity, from_pos, to_pos)
 signal entity_attacked(attacker, target, damage)
+signal entity_ranged_attack(attacker, target, damage)
 signal entity_healed(entity, amount)
 signal entity_died(entity)
 signal entity_spawned(entity)

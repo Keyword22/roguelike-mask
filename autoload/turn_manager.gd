@@ -21,10 +21,8 @@ func execute_player_action(action) -> void:
 
 	action.execute()
 
-	await get_tree().create_timer(0.05).timeout
-
-	await _process_enemy_turn()
-	await _process_world_update()
+	_process_enemy_turn()
+	_process_world_update()
 
 	current_phase = Phase.PLAYER_INPUT
 	is_processing = false
@@ -41,7 +39,6 @@ func _process_enemy_turn() -> void:
 			var action = enemy.get_action()
 			if action:
 				action.execute()
-				await get_tree().create_timer(0.02).timeout
 
 func _process_world_update() -> void:
 	current_phase = Phase.WORLD_UPDATE

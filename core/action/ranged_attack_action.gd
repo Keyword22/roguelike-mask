@@ -16,7 +16,7 @@ func execute() -> bool:
 	var damage = entity.attack + damage_bonus
 	var actual_damage = target.take_damage(damage)
 
-	EventBus.entity_attacked.emit(entity, target, actual_damage)
+	EventBus.entity_ranged_attack.emit(entity, target, actual_damage)
 
 	if not target.is_alive():
 		EventBus.message_logged.emit("¡" + target.entity_name + " ha sido derrotado!", Color.ORANGE)

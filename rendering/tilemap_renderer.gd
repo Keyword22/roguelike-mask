@@ -40,6 +40,7 @@ func _ready() -> void:
 	EventBus.mask_picked_up.connect(_on_mask_picked_up)
 	EventBus.mask_equipped.connect(_on_mask_equipped)
 	EventBus.entity_attacked.connect(_on_entity_attacked)
+	EventBus.entity_ranged_attack.connect(_on_entity_ranged_attack)
 	EventBus.entity_healed.connect(_on_entity_healed)
 
 	_preload_sprites()
@@ -63,6 +64,8 @@ func _preload_sprites() -> void:
 		"mask": "res://sprites/mask.png",
 		"stairs_down": "res://sprites/stairs_down.png",
 		"stairs_up": "res://sprites/stairs_up.png",
+		"projectile_fairy": "res://sprites/projectile_fairy.png",
+		"projectile_demon": "res://sprites/projectile_demon.png",
 	}
 
 	for key in paths:
@@ -518,6 +521,22 @@ func _on_entity_attacked(_attacker: Entity, target: Entity, damage: int) -> void
 	else:
 		spawn_floating_text(target.grid_position, str(damage), Color.RED)
 
+func _on_entity_ranged_attack(attacker: Entity, target: Entity, damage: int) -> void:
+	var sprite_key = ""
+	var fallback_color = Color.WHITE
+	var fallback_symbol = "*"
+
+	if attacker is Fairy:
+		sprite_key = "projectile_fairy"
+		fallback_color = Color.MAGENTA
+	elif attacker is Demon:
+		sprite_key = "projectile_demon"
+		fallback_color = Color.ORANGE_RED
+		fallback_symbol = "o"
+
+	spawn_projectile(attacker.grid_position, target.grid_position, sprite_key, fallback_color, fallback_symbol)
+	spawn_floating_text(target.grid_position, str(damage), Color.RED)
+
 func _on_entity_healed(entity: Entity, amount: int) -> void:
 	spawn_floating_text(entity.grid_position, "+" + str(amount), Color.LIME_GREEN)
 
@@ -543,3 +562,34 @@ func spawn_floating_text(grid_pos: Vector2i, text: String, color: Color) -> void
 	tween.tween_property(label, "modulate:a", 0.0, 0.6).set_ease(Tween.EASE_IN).set_delay(0.2)
 	tween.set_parallel(false)
 	tween.tween_callback(label.queue_free)
+
+func spawn_projectile(from_pos: Vector2i, to_pos: Vector2i, sprite_key: String, fallback_color: Color, fallback_symbol: String = "*") -> void:
+	var start = Vector2(from_pos.x * TILE_SIZE + TILE_SIZE / 2, from_pos.y * TILE_SIZE + TILE_SIZE / 2)
+	var end = Vector2(to_pos.x * TILE_SIZE + TILE_SIZE / 2, to_pos.y * TILE_SIZE + TILE_SIZE / 2)
+
+	var projectile: CanvasItem
+	if has_sprite(sprite_key):
+		var sprite = Sprite2D.new()
+		sprite.texture = sprite_cache[sprite_key]
+		sprite.z_index = 90
+		sprite.position = start
+		add_child(sprite)
+		projectile = sprite
+	else:
+		var label = Label.new()
+		label.text = fallback_symbol
+		label.add_theme_color_override("font_color", fallback_color)
+		label.add_theme_font_size_override("font_size", 16)
+		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		label.z_index = 90
+		label.position = start - Vector2(8, 8)
+		add_child(label)
+		projectile = label
+
+	var distance = start.distance_to(end)
+	var duration = clamp(distance / 300.0, 0.1, 0.4)
+
+	var tween = create_tween()
+	tween.tween_property(projectile, "position", end if projectile is Sprite2D else end - Vector2(8, 8), duration).set_trans(Tween.TRANS_LINEAR)
+	tween.tween_callback(projectile.queue_free)
