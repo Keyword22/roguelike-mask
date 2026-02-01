@@ -749,7 +749,8 @@ func _on_mask_equipped(_mask: Mask, entity: Entity) -> void:
 		_update_player_sprite(entity as Player)
 
 func _on_entity_attacked(attacker: Entity, target: Entity, damage: int) -> void:
-	_update_entity_facing(attacker, attacker.grid_position, target.grid_position, true)
+	var invert = not (attacker is Player)
+	_update_entity_facing(attacker, attacker.grid_position, target.grid_position, invert)
 	_play_entity_animation(attacker, "attack")
 	if damage == 0:
 		spawn_floating_text(target.grid_position, "MISS", Color.GRAY)
@@ -757,7 +758,8 @@ func _on_entity_attacked(attacker: Entity, target: Entity, damage: int) -> void:
 		spawn_floating_text(target.grid_position, str(damage), Color.RED)
 
 func _on_entity_ranged_attack(attacker: Entity, target: Entity, damage: int) -> void:
-	_update_entity_facing(attacker, attacker.grid_position, target.grid_position, true)
+	var invert = not (attacker is Player)
+	_update_entity_facing(attacker, attacker.grid_position, target.grid_position, invert)
 	_play_entity_animation(attacker, "attack")
 
 	var sprite_key = ""
